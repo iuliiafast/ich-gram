@@ -22,5 +22,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Экспорт конфигурации Next.js
 export default nextConfig;
