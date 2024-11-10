@@ -4,7 +4,7 @@ import User from '../models/userModel.js';
 // Получение списка подписчиков пользователя
 export const getUserFollowers = async (req, res) => {
   try {
-    const followers = await Follow.find({ followed_user_id: req.params.userId }).populate('follower_user_id', 'username');
+    const followers = await Follow.find({ follower_user_id: req.params.userId }).populate('follower_user_id', 'username');
     res.status(200).json(followers);
   } catch (error) {
     res.status(500).json({ error: 'Ошибка при получении подписчиков' });
@@ -14,7 +14,9 @@ export const getUserFollowers = async (req, res) => {
 // Получение списка, на кого подписан пользователь
 export const getUserFollowing = async (req, res) => {
   try {
-    const following = await Follow.find({ follower_user_id: req.params.userId }).populate('followed_user_id', 'username');
+    console.log(req.params.userId)
+
+    const following = await Follow.find({ followed_user_id: req.params.userId }).populate('followed_user_id', 'username');
     res.status(200).json(following);
   } catch (error) {
     res.status(500).json({ error: 'Ошибка при получении списка подписок' });
@@ -32,7 +34,7 @@ export const followUser = async (req, res) => {
     if (!user || !targetUser) {
       return res.status(404).json({ error: 'Пользователь не найден' });
     }
-
+    // To-Do
     const existingFollow = await Follow.findOne({ follower_user_id: userId, followed_user_id: targetUserId });
     if (existingFollow) {
       return res.status(400).json({ error: 'Вы уже подписаны на этого пользователя' });
@@ -41,17 +43,15 @@ export const followUser = async (req, res) => {
     const follow = new Follow({
       follower_user_id: userId,
       followed_user_id: targetUserId,
+      user_id: userId,
       created_at: new Date(),
     });
 
-    await follow.save();
-
     user.following_count += 1;
     targetUser.followers_count += 1;
-
     await user.save();
     await targetUser.save();
-
+    await follow.save();
     res.status(201).json(follow);
   } catch (error) {
     res.status(500).json({ error: 'Ошибка при подписке на пользователя' });

@@ -11,7 +11,7 @@ const Notifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
-    const socket: Socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000");
+    const socket: Socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3000");
 
     // Получение нового уведомления и обновление состояния
     socket.on("newNotification", (data: Notification) => {

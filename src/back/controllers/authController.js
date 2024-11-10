@@ -4,12 +4,11 @@ import generateToken from '../config/jwt.js';
 
 // Регистрация пользователя
 export const register = async (req, res) => {
-  const { username, email, password, full_name } = req.body;
+  const { email, password, full_name, username } = req.body;
 
   try {
-    // Проверка наличия пользователя с таким же email или именем пользователя
+    // Проверка на существование пользователя с таким email или username
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-
     if (existingUser) {
       return res.status(400).json({ message: 'Пользователь с таким email или именем уже существует' });
     }
@@ -25,14 +24,17 @@ export const register = async (req, res) => {
       full_name
     });
 
+    // Сохранение нового пользователя в базе данных
     await user.save();
 
     // Генерация токена
     const token = generateToken(user);
 
-    res.status(201).json({ token, user });
+    // Отправка успешного ответа с токеном и данными пользователя
+    res.status(201).json({ token, user, message: 'Регистрация успешна!' });
   } catch (error) {
-    res.status(500).json({ message: 'Ошибка регистрации', error: error.message });
+    console.error("Ошибка при регистрации:", error);
+    res.status(500).json({ message: "Внутренняя ошибка сервера", error: error.message });
   }
 };
 
@@ -58,8 +60,10 @@ export const login = async (req, res) => {
     // Генерация токена
     const token = generateToken(user);
 
+    // Отправка успешного ответа с токеном и данными пользователя
     res.status(200).json({ token, user });
   } catch (error) {
+    console.error("Ошибка при логине:", error);
     res.status(500).json({ message: 'Ошибка авторизации', error: error.message });
   }
 };

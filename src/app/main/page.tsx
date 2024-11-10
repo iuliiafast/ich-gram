@@ -1,13 +1,19 @@
 import Sidebar from '../../components/Sidebar';
-import { cookies } from 'next/headers'; // Импортируем cookies
+import { cookies } from 'next/headers';
 
-type MainPageProps = {
-  username: string | null;
-  errorMessage?: string;
+type UserProfileResponse = {
+  username: string;
 };
 
-// Функция для получения профиля пользователя
-async function fetchUserProfile(token: string) {
+type ErrorProps = {
+  message: string;
+};
+
+const ErrorMessage = ({ message }: ErrorProps) => (
+  <div className="text-red-500 text-center mt-4">{message}</div>
+);
+
+async function fetchUserProfile(token: string): Promise<string> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -15,44 +21,36 @@ async function fetchUserProfile(token: string) {
   });
 
   if (!response.ok) {
-    throw new Error("Ошибка загрузки профиля");
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Ошибка загрузки профиля");
   }
 
-  const data = await response.json();
-  return data.username; // Предполагаем, что API возвращает объект с полем username
+  const data: UserProfileResponse = await response.json();
+  return data.username;
 }
 
 export default async function MainPage() {
-  const cookieStore = await cookies(); // Ожидаем куки
-  const token = cookieStore.get('token')?.value; // Получаем токен из куки
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
 
-  // Проверяем, есть ли токен
   if (!token) {
-    return (
-      <div className="text-red-500 text-center mt-4">
-        Вы не авторизованы. Пожалуйста, войдите в систему.
-      </div>
-    );
+    return <ErrorMessage message="Вы не авторизованы. Пожалуйста, войдите в систему." />;
   }
 
   let username: string | null = null;
   let errorMessage: string | null = null;
 
   try {
-    username = await fetchUserProfile(token); // Получаем имя пользователя
+    username = await fetchUserProfile(token);
   } catch (error) {
     console.error("Ошибка загрузки профиля:", error);
-    errorMessage = "Ошибка загрузки профиля";
+    errorMessage = error instanceof Error ? error.message : "Ошибка загрузки профиля";
   }
 
-  // Если есть ошибка, отображаем сообщение
   if (errorMessage) {
-    return (
-      <p className="text-red-500 text-center mt-4">{errorMessage}</p>
-    );
+    return <ErrorMessage message={errorMessage} />;
   }
 
-  // Если все прошло успешно, отображаем содержимое
   return (
     <div className="flex h-screen bg-gray-100">
       <Sidebar /> {/* Боковая панель */}

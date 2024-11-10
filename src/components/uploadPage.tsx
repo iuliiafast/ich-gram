@@ -1,10 +1,12 @@
 import { ImageForm } from './ImageForm';
+import { useState } from "react";
 
 const UploadPage = () => {
+  const [image, setImage] = useState<File | null>(null);
   return (
     <div>
       <h1>Загрузите изображение</h1>
-      <ImageForm />
+      <ImageForm setImage={setImage} />
     </div>
   );
 };

@@ -1,11 +1,13 @@
 import { cookies } from 'next/headers';
 
 export default async function MainPage() {
-  const cookieStore = cookies();
+  // Дождитесь разрешения промиса
+  const cookieStore = await cookies();
+
+  // Теперь можно использовать .get
   const token = cookieStore.get('token')?.value;
 
   if (!token) {
-    // Перенаправление на страницу логина, если токен отсутствует
     return <p style={{ color: 'red' }}>Вы не авторизованы. Пожалуйста, войдите в систему.</p>;
   }
 

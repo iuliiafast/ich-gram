@@ -25,6 +25,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Укажите путь к вашему favicon файлу */}
+        <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

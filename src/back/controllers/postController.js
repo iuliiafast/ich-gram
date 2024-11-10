@@ -1,19 +1,24 @@
 import Post from '../models/postModel.js';
 import User from '../models/userModel.js';
 import getUserIdFromToken from '../utils/helpers.js';
-import { v2 as cloudinary } from 'cloudinary';
 import stream from 'stream';
-import multer from 'multer'
-
-
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage })
+import cloudinary from '../../../cloudinaryConfig.js';
 
 // Получение всех постов пользователя
 export const getUserPosts = async (req, res) => {
   try {
-    const posts = await Post.find({ user_id: getUserIdFromToken(req) });
+    const userId = getUserIdFromToken(req);
+    const posts = await Post.find({ user_id: userId });
+    res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json({ error: 'Ошибка при получении постов' });
+  }
+};
+
+// Получение всех постов
+export const getAllPosts = async (req, res) => {
+  try {
+    const posts = await Post.find();
     res.status(200).json(posts);
   } catch (error) {
     res.status(500).json({ error: 'Ошибка при получении постов' });
@@ -26,54 +31,49 @@ export const createPost = async (req, res) => {
   const { caption } = req.body;
 
   try {
-    // get image
-    const bufferStream = new stream.PassThrough()
-    bufferStream.end(req.file.buffer)
+    if (!req.file) {
+      return res.status(400).json({ error: 'Изображение не предоставлено' });
+    }
 
-    let image_url = ''
+    const uploadImage = () =>
+      new Promise((resolve, reject) => {
+        const bufferStream = new stream.PassThrough();
+        bufferStream.end(req.file.buffer);
 
-    cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
-      if (error) {
-        return res.status(500).json({ message: 'Ошибка загрузки' })
-      }
-      image_url = result.secure_url
-      res.status(201).json({ message: 'Картинка сохранилась', url: result.secure_url })
-    }).end(req.file.buffer)
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { resource_type: 'image' },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result.secure_url);
+          }
+        );
+
+        bufferStream.pipe(uploadStream);
+      });
+
+    // Загружаем изображение и создаем пост
+    const image_url = await uploadImage();
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
 
-    cloudinary.uploader.upload_stream({ resource_type: 'image' }, async (error, result) => {
-      if (error) {
-        return res.status(500).json({ message: 'Ошибка загрузки' })
-      }
-      image_url = result.secure_url
+    const post = new Post({
+      user_id: userId,
+      image_url,
+      user_name: user.username,
+      profile_image: user.profile_image,
+      caption,
+      created_at: new Date(),
+    });
 
-      const user = await User.findById(userId);
-      if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+    await post.save();
 
-      // Проверяем, был ли загружен файл
-      if (!req.file) return res.status(400).json({ error: 'Изображение не предоставлено' });
+    user.posts_count += 1;
+    await user.save();
 
-      const post = new Post({
-        user_id: userId,
-        // image_url: `data:image/jpeg;base64,${imageBase64}`, // Используйте соответствующий формат изображения
-        image_url,
-        caption,
-        created_at: new Date(),
-      });
-
-      await post.save();
-
-      user.posts_count += 1;
-      await user.save();
-
-      res.status(201).json(post);
-
-    }).end(req.file.buffer)
-
+    res.status(201).json(post);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({ error: 'Ошибка при создании поста' });
   }
 };
@@ -89,8 +89,10 @@ export const deletePost = async (req, res) => {
     await Post.findByIdAndDelete(postId);
 
     const user = await User.findById(post.user_id);
-    user.posts_count -= 1;
-    await user.save();
+    if (user) {
+      user.posts_count -= 1;
+      await user.save();
+    }
 
     res.status(200).json({ message: 'Пост удалён' });
   } catch (error) {

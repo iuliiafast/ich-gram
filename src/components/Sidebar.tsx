@@ -1,9 +1,10 @@
 "use client";
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation'; // Импортируем usePathname
 
 const Sidebar = () => {
   const router = useRouter();
+  const pathname = usePathname(); // Получаем текущий путь
 
   const menuItems = [
     { name: 'Главная', path: '/' },
@@ -25,7 +26,7 @@ const Sidebar = () => {
           <li key={item.name}>
             <Link href={item.path}>
               <span
-                className={`block p-2 rounded cursor-pointer hover:bg-gray-200 ${router.pathname === item.path ? 'font-bold bg-gray-300' : ''
+                className={`block p-2 rounded cursor-pointer hover:bg-gray-200 ${pathname === item.path ? 'font-bold bg-gray-300' : ''
                   }`}
               >
                 {item.name}

@@ -1,35 +1,50 @@
+// src/components/ImageForm.tsx
+"use client";
 import { useState } from "react";
-import { $api } from "../api/api";
+import { $api } from "../utils/api";
 
-export const ImageForm = () => {
-  const [file, setFile] = useState<File>();
-  const [filePath, setfilePath] = useState("");
+// Обновляем типизацию, чтобы компонент принимал setImage
+type ImageFormProps = {
+  setImage: React.Dispatch<React.SetStateAction<File | null>>;
+};
 
-  const handleSubmit = (e) => {
+export const ImageForm = ({ setImage }: ImageFormProps) => {
+  const [file, setFile] = useState<File | null>(null);
+  const [filePath, setFilePath] = useState<string>("");
+  const [error, setError] = useState<string>("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!file) {
+      setError("Пожалуйста, выберите изображение");
       return;
     }
 
     const formData = new FormData();
     formData.append("image", file);
 
-    const response = $api
-      .post("/post", formData) // тут была ошибка
-      .then((res) => setfilePath(res.data.url));
+    try {
+      const response = await $api.post("/post", formData);
+      setFilePath(response.data.url); // Устанавливаем путь к загруженному изображению
+      setImage(file); // Передаем файл в родительский компонент через setImage
+      setError("");  // Очистка ошибок
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Ошибка при загрузке изображения");
+    }
   };
+
   return (
     <form onSubmit={handleSubmit}>
       <input
         required
-        //@ts-ignore
-        onChange={(e) => setFile(e.target.files[0])}
         type="file"
+        onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
         accept="image/*"
       />
-      <button>Отпправить картинку</button>
-      <span>url до картинки {filePath}</span>
+      <button type="submit">Отправить картинку</button>
+      {error && <p className="text-red-500">{error}</p>}
+      {filePath && <span>URL картинки: {filePath}</span>}
     </form>
   );
 };

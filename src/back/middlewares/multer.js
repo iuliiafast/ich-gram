@@ -1,7 +1,15 @@
 import multer from 'multer';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import cloudinary from '../../../cloudinaryConfig.js';
 
-// Настройка multer
-const storage = multer.memoryStorage(); // Хранить файлы в памяти
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'ich-gram',
+    allowed_formats: ['jpg', 'jpeg', 'png'],
+  },
+});
+
 const upload = multer({ storage });
 
 export default upload;

@@ -1,7 +1,6 @@
 "use client";
-
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Use next/navigation for routing in Next.js 13+
+import { useRouter } from "next/navigation";
 import axios from "axios";
 
 export default function ResetPasswordPage() {
@@ -16,7 +15,6 @@ export default function ResetPasswordPage() {
     setMessage("");
 
     try {
-      // Call your reset password API endpoint
       const response = await axios.post("/api/reset-password", { email });
       setMessage(response.data.message || "Check your email for reset instructions.");
     } catch (error) {
