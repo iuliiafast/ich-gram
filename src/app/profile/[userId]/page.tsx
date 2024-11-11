@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import axios, { AxiosError } from "axios"; // Импортируем AxiosError для правильной типизации
+import axios, { AxiosError } from "axios";
 import Cookies from "js-cookie";
 import ProfileForm from "@components/ProfileForm";
 import Footer from "@components/Footer";
@@ -24,8 +24,8 @@ interface Post {
 
 const ProfilePage = () => {
   const { userId } = useParams();
-  const validUserId = Array.isArray(userId) ? userId[0] : userId; // Проверка userId
-  const [userProfile, setUserProfile] = useState<UserProfile>({ username: "", bio: "" });
+  const validUserId = Array.isArray(userId) ? userId[0] : userId;
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -33,8 +33,13 @@ const ProfilePage = () => {
   const token = Cookies.get("token");
 
   useEffect(() => {
-    if (!validUserId || !token) {
-      setErrorMessage("Не удалось авторизоваться или идентификатор пользователя отсутствует.");
+    if (!validUserId) {
+      setErrorMessage("Отсутствует идентификатор пользователя.");
+      return;
+    }
+
+    if (!token) {
+      setErrorMessage("Не удалось авторизоваться: токен отсутствует.");
       return;
     }
 
@@ -61,12 +66,14 @@ const ProfilePage = () => {
         } else {
           throw new Error(`Ошибка при загрузке постов: ${postsResponse.statusText}`);
         }
-      } catch (error: any) {
-        // Обработка ошибок с использованием AxiosError
+      } catch (error: unknown) {
+        // Улучшение обработки ошибок
         if (axios.isAxiosError(error)) {
-          setErrorMessage(error.response?.data?.message || "Ошибка при загрузке данных");
+          const axiosError = error as AxiosError;
+          console.error("Ошибка при загрузке данных с сервера:", error.response?.data);
+          setErrorMessage(axiosError.response?.data?.message || "Ошибка при загрузке данных");
         } else {
-          setErrorMessage("Не удалось загрузить данные.");
+          setErrorMessage("Произошла непредвиденная ошибка при загрузке данных.");
         }
         console.error("Ошибка при загрузке данных:", error);
       } finally {
@@ -88,8 +95,14 @@ const ProfilePage = () => {
         ) : (
           <div>
             {/* Профиль пользователя */}
-            <h1 className="text-2xl font-bold mb-4">Профиль {userProfile.username}</h1>
-            <ProfileForm userProfile={userProfile} userId={validUserId!} />
+            {userProfile ? (
+              <>
+                <h1 className="text-2xl font-bold mb-4">Профиль {userProfile.username}</h1>
+                <ProfileForm userProfile={userProfile} userId={validUserId!} />
+              </>
+            ) : (
+              <p>Информация о пользователе недоступна.</p>
+            )}
 
             {/* Лента постов */}
             <h2 className="text-xl font-bold mt-8 mb-4">Посты</h2>

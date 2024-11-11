@@ -1,19 +1,17 @@
-// WebSocketComponent.tsx (или WebSocketComponent.js, если пишете на JavaScript)
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import Cookies from 'js-cookie';
 
 const WebSocketComponent = () => {
   const [message, setMessage] = useState<string | null>(null);
-  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     const token = Cookies.get('token'); // Получаем токен из cookies
 
     if (token) {
-      // Подключение к WebSocket серверу с передачей токена
+      // Подключение к WebSocket серверу с передачей токена через auth
       const socketConnection = io('http://localhost:3000', {
-        query: { token }, // Передаем токен при подключении
+        auth: { token }, // Используем auth для передачи токена
         path: '/socket.io', // Путь, по которому доступен WebSocket сервер
       });
 
@@ -30,13 +28,17 @@ const WebSocketComponent = () => {
         console.log('Отключено от WebSocket');
       });
 
-      setSocket(socketConnection);
-
+      socketConnection.on('connect_error', (error) => {
+        console.error('Ошибка подключения:', error.message);
+      });
+      // Отключаем сокет при размонтировании компонента
       return () => {
-        socketConnection.disconnect(); // Отключение сокета при размонтировании
+        socketConnection.disconnect();
       };
+    } else {
+      console.log('Токен не найден в cookies');
     }
-  }, []);
+  }, []); // useEffect с пустым массивом зависимостей, вызывается только один раз
 
   return (
     <div>

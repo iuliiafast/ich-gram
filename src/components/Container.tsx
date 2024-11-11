@@ -1,3 +1,4 @@
+"use client";
 import React, { ReactNode } from 'react';
 
 // Интерфейс для пропсов компонента Container

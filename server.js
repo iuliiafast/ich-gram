@@ -11,7 +11,7 @@ import followRoutes from './src/back/routes/followRoutes.js';
 import notificationRoutes from './src/back/routes/notificationRoutes.js';
 import { specs, swaggerUi } from './swagger.js';
 import connectDB from './src/back/config/db.js';
-import { messageSocketHandler, authenticateSocket } from './src/back/routes/messageRoutes.js';
+import { messageSocketHandler, authenticateSocket } from './src/back/routes/messageRoutes.tsx';
 import next from 'next';
 import upload from './src/back/middlewares/multer.js';
 import http from 'http';

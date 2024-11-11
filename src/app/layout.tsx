@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./styles/globals.css";
+import { ModalProvider } from './context/ModalContext'; // Импорт ModalProvider
+import Modal from './components/Modal'; // Импорт компонента Modal
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,13 +28,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Укажите путь к вашему favicon файлу */}
-        <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+        {/* Добавляем ссылку на favicon */}
+        <link rel="icon" href="/favicon.ico" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        {/* Оборачиваем всё в ModalProvider */}
+        <ModalProvider>
+          {children}
+          {/* Вставляем компонент Modal */}
+          <Modal />
+        </ModalProvider>
       </body>
     </html>
   );

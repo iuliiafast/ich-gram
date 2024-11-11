@@ -42,12 +42,23 @@ const PostForm = () => {
 
       // Обновляем состояние или выполняем другие действия после успешного создания поста
       console.log("Пост создан:", response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Ошибка при создании поста:", error);
-      setError(
-        error.response?.data?.message || "Не удалось создать пост. Попробуйте снова."
-      );
-      setSuccessMessage("");
+
+      // Проверяем, является ли ошибка ошибкой Axios
+      if (axios.isAxiosError(error)) {
+        setError(
+          error.response?.data?.message || "Не удалось создать пост. Попробуйте снова."
+        );
+      } else if (error instanceof Error) {
+        // Если это обычная ошибка (не от Axios)
+        setError(error.message || "Неизвестная ошибка при создании поста.");
+      } else {
+        // Если ошибка не является экземпляром Error или AxiosError
+        setError("Неизвестная ошибка.");
+      }
+
+      setSuccessMessage(""); // Сбрасываем успешное сообщение
     }
   };
 

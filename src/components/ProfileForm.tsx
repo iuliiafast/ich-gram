@@ -1,8 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios, { AxiosError } from "axios";  // Импорт AxiosError для правильной типизации
 import AvatarUpload from "./AvatarUpload";
 import Cookies from "js-cookie";
+import Image from 'next/image';
 
 interface UserProfile {
   username: string;
@@ -27,7 +28,7 @@ const ProfileForm = ({ userId }: ProfileFormProps) => {
   const token = Cookies.get("token");
 
   // Функция загрузки данных пользователя
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(`/api/user/profile/${userId}`, {
@@ -61,9 +62,8 @@ const ProfileForm = ({ userId }: ProfileFormProps) => {
     } finally {
       setIsLoading(false); // Завершаем загрузку вне зависимости от результата запроса
     }
-  };
+  }, [userId, token]);
 
-  // Запуск функции в useEffect
   useEffect(() => {
     if (!userId || !token) {
       setError("Необходимо авторизоваться или предоставить корректный userId.");
@@ -71,7 +71,7 @@ const ProfileForm = ({ userId }: ProfileFormProps) => {
     }
 
     fetchUserData();
-  }, [userId, token]);
+  }, [userId, token, fetchUserData]);
 
   // Обработчик формы
   const handleSubmit = async (e: React.FormEvent) => {
@@ -148,7 +148,13 @@ const ProfileForm = ({ userId }: ProfileFormProps) => {
       </form>
 
       {/* Display Avatar */}
-      {avatarUrl && <div><img src={avatarUrl} alt="User Avatar" width="150" height="150" /></div>}
+      {avatarUrl && <div> <Image
+        src={avatarUrl}
+        alt="User Avatar"
+        width={150}
+        height={150}
+        placeholder="blur" // необязательно, добавляет эффект размытия до полной загрузки
+      /></div>}
     </div>
   );
 };

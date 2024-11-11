@@ -1,3 +1,4 @@
+// /services/api.ts
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
@@ -16,7 +17,6 @@ export const $api = axios.create({
 $api.interceptors.request.use(
   (config) => {
     const token = Cookies.get('token');
-    console.log("Токен перед отправкой:", token);
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -37,13 +37,14 @@ $api.interceptors.response.use(
         console.warn("Токен истёк или отсутствует. Перенаправление на страницу входа.");
         Cookies.remove('token');
 
-        // Важно! Хук useRouter можно использовать только внутри компонента, поэтому редирект лучше делать так:
+        // Важно: редирект и управление состоянием модального окна лучше делать в компоненте
         if (typeof window !== 'undefined') {
-          const router = useRouter();  // Использование useRouter
-          router.push('/login');  // Переход на страницу входа
+          const router = useRouter();
+          router.push('/login');
         }
-
-        alert("Ваша сессия истекла. Пожалуйста, войдите заново.");
+        // В данном случае модальное окно можно открывать через глобальное состояние
+        // Просто вызываем ошибку, которую будет обрабатывать компонент, который показывает модальное окно.
+        throw new Error("Ваша сессия истекла. Пожалуйста, войдите заново.");
       } else {
         console.error('API Error:', error.response.data);
       }

@@ -1,5 +1,7 @@
-// components/PostFeed.tsx
+"use client";
+import Image from 'next/image';
 import React from "react";
+
 
 interface Post {
   id: string;
@@ -19,7 +21,15 @@ const PostFeed: React.FC<PostFeedProps> = ({ posts }) => {
       {posts.map((post) => (
         <div key={post.id} className="bg-white p-4 rounded-lg shadow-md">
           {post.image && (
-            <img src={post.image} alt="Post image" className="w-full h-auto rounded mb-2" />
+            <Image
+              src={post.image}
+              alt="Post image"
+              width={800} // Укажите ширину изображения
+              height={600} // Укажите высоту изображения
+              className="w-full h-auto rounded mb-2"
+              layout="responsive" // Подходит для адаптивных изображений
+              objectFit="cover"   // Дополнительный стиль для обрезки
+            />
           )}
           <h2 className="text-lg font-bold">{post.title}</h2>
           <p className="text-sm text-gray-600">{new Date(post.createdAt).toLocaleDateString()}</p>
