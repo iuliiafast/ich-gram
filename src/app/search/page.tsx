@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import axios from "axios";
+import React from "react";
 
 type SearchResult = {
   id: number;

@@ -62,7 +62,7 @@ const RegisterPage = () => {
       const response = await axios.post("/api/auth/register", userObject);
       if (response.data?.token) {
         Cookies.set("token", response.data.token, { expires: 7, sameSite: "lax", secure: false });
-        router.push(`/profile/${response.data.user?._id}`);
+        router.push(`/main`);
       }
     } catch (error: unknown) {
       let errorMsg = "Произошла ошибка при регистрации.";

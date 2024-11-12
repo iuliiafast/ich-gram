@@ -38,3 +38,8 @@ a:hover {
   text-decoration: underline;
   /* Подчеркивание при наведении */
 }
+
+/* explore */
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}

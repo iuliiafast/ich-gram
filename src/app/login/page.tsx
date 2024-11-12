@@ -44,7 +44,9 @@ export default function LoginPage() {
       console.log('Токен не найден в cookies');
     }
   }, []);*/
+"use client";
 import { useEffect } from "react";
+import React from 'react';
 import Cookies from "js-cookie";
 import dynamic from 'next/dynamic';
 import { useRouter } from "next/navigation";
@@ -92,7 +94,7 @@ export default function LoginPage() {
     } else {
       // Если токен не найден, перенаправление на страницу авторизации
       console.log('Токен не найден. Переход на страницу авторизации.');
-      router.push("/");
+      //router.push("/");
     }
   }, [router]);
 
