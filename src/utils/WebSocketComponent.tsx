@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import Cookies from 'js-cookie';
+import React from 'react';
 
 const WebSocketComponent = () => {
   const [message, setMessage] = useState<string | null>(null);

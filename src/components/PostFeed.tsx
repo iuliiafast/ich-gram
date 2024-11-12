@@ -1,46 +1,41 @@
 "use client";
-import React from 'react';
-import Image from 'next/image';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 interface Post {
   id: string;
-  title: string;
   content: string;
-  image?: string; // URL изображения, если есть
-  createdAt: string;
+  author: string;
+  timestamp: string;
 }
 
-interface PostFeedProps {
-  posts: Post[]; // Массив постов передается как пропс
-  onPostClick: (postId: string) => void; // Функция для обработки клика по посту
-}
+const PostFeed = () => {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-const PostFeed: React.FC<PostFeedProps> = ({ posts = [], onPostClick }) => { // Добавлена дефолтная пустая строка для posts
-  if (!posts || posts.length === 0) {
-    return <p>Нет доступных постов.</p>; // Вывод сообщения, если постов нет
-  }
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await axios.get("/api/posts");
+        setPosts(response.data);
+      } catch (error) {
+        setError("Не удалось загрузить посты. Попробуйте позже.");
+        console.error(error);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
   return (
-    <div className="space-y-4">
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Лента постов</h1>
+      {error && <p className="text-red-500">{error}</p>}
       {posts.map((post) => (
-        <div
-          key={post.id}
-          className="bg-white p-4 rounded-lg shadow-md cursor-pointer" // Добавил курсор pointer для постов
-          onClick={() => onPostClick(post.id)} // Обработчик клика по посту
-        >
-          {post.image && (
-            <Image
-              src={post.image}
-              alt="Post image"
-              width={800} // Указываем ширину изображения
-              height={600} // Указываем высоту изображения
-              className="w-full h-auto rounded mb-2"
-              layout="responsive" // Адаптивное изображение
-              objectFit="cover" // Обрезка изображения
-            />
-          )}
-          <h2 className="text-lg font-bold">{post.title}</h2>
-          <p className="text-sm text-gray-600">{new Date(post.createdAt).toLocaleDateString()}</p>
-          <p className="mt-2 text-gray-800">{post.content}</p>
+        <div key={post.id} className="border-b border-gray-300 py-4">
+          <p className="font-semibold">{post.author}</p>
+          <p>{post.content}</p>
+          <p className="text-gray-400 text-sm">{new Date(post.timestamp).toLocaleString()}</p>
         </div>
       ))}
     </div>

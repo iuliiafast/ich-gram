@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
-import axios, { AxiosError } from "axios";  // Импорт AxiosError для правильной типизации
+import React, { useState, useEffect, useCallback } from "react";
+import axios, { AxiosError } from "axios";
 import AvatarUpload from "./AvatarUpload";
 import Cookies from "js-cookie";
 import Image from 'next/image';
@@ -98,10 +98,13 @@ const ProfileForm = ({ userId }: ProfileFormProps) => {
       setSuccessMessage("Профиль успешно обновлен!");
     } catch (error: unknown) {
       const err = error as AxiosError;
-      setError("Не удалось обновить профиль. Попробуйте снова.");
-    } finally {
-      setIsLoading(false);
+      if (err.response && err.response.status === 400) {
+        setError("Некорректные данные. Проверьте введённую информацию.");
+      } else {
+        setError("Не удалось обновить профиль. Попробуйте снова.");
+      }
     }
+
   };
 
   return (

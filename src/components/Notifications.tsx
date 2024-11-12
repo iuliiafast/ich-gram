@@ -1,28 +1,39 @@
 "use client";
-import { useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
-
-type Notification = {
-  id: number;
-  message: string;
-};
+import React, { useEffect, useState } from 'react';
+import { io, Socket } from 'socket.io-client';
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
-    const socket: Socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3000");
+    // Подключаем сокет при монтировании компонента
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3000";
+    const socket: Socket = io(socketUrl);
 
-    // Получение нового уведомления и обновление состояния
+
+    // Подписываемся на событие уведомления
     socket.on("newNotification", (data: Notification) => {
       console.log("New Notification:", data);
       setNotifications((prev) => [...prev, data]);
     });
 
+    // Отслеживаем ошибки подключения
+    socket.on("connect_error", (error) => {
+      console.error("Ошибка подключения:", error);
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("Сокет отключён:", reason);
+    });
+
+    // Очистка: отключаем сокет при размонтировании компонента
     return () => {
-      socket.disconnect();
+      if (socket) {
+        socket.disconnect();
+        console.log('Сокет отключён и очищен');
+      }
     };
-  }, []);
+  }, []); // Пустой массив зависимостей для однократного выполнения при монтировании
 
   return (
     <div className="p-4 border rounded-lg shadow-lg bg-white">
@@ -31,10 +42,8 @@ const Notifications = () => {
         <p>Нет новых уведомлений</p>
       ) : (
         <ul className="space-y-2">
-          {notifications.map((notification) => (
-            <li key={notification.id} className="border-b pb-2">
-              {notification.message}
-            </li>
+          {notifications.map((notification, index) => (
+            <li key={index}>{notification.message}</li>
           ))}
         </ul>
       )}

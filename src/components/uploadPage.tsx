@@ -1,6 +1,7 @@
 "use client";
 import { ImageForm } from './ImageForm';
 import { useState } from "react";
+import React from 'react';
 
 const UploadPage = () => {
   const [image, setImage] = useState<File | null>(null);
