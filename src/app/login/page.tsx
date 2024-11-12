@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+/*import { useEffect } from "react";
 import Image from 'next/image';
 import Container from '../../components/Container';
 import Link from 'next/link';
@@ -17,6 +17,7 @@ export default function LoginPage() {
   // Эффект для подключения WebSocket после успешного логина
   useEffect(() => {
     const token = Cookies.get('token');
+    console.log("Токен из cookies:", token);  // Проверка токена
     if (token) {
       const socketConnection = io('http://localhost:3000', {
         extraHeaders: {
@@ -42,7 +43,58 @@ export default function LoginPage() {
     } else {
       console.log('Токен не найден в cookies');
     }
-  }, []);
+  }, []);*/
+import { useEffect } from "react";
+import Cookies from "js-cookie";
+import dynamic from 'next/dynamic';
+import { useRouter } from "next/navigation";
+import { io } from 'socket.io-client';
+import Container from '../../components/Container';
+import { LoginForm } from '../../components/LoginForm';
+import Link from 'next/link';
+import Image from 'next/image';
+
+const WebSocketComponent = dynamic(() => import('../../utils/WebSocketComponent'), {
+  ssr: false,
+});
+
+export default function LoginPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = Cookies.get('token');
+    console.log("Токен из cookies:", token);
+
+    if (token) {
+      // Инициализация WebSocket-соединения с токеном
+      const socketConnection = io('http://localhost:3000', {
+        extraHeaders: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      socketConnection.on('connect', () => {
+        console.log('Подключение успешно установлено!');
+      });
+
+      socketConnection.on('message', (data) => {
+        console.log(data);
+      });
+
+      socketConnection.on('connect_error', (err) => {
+        console.log('Ошибка подключения:', err.message);
+      });
+
+      // Отключение сокета при размонтировании компонента
+      return () => {
+        socketConnection.disconnect();
+      };
+    } else {
+      // Если токен не найден, перенаправление на страницу авторизации
+      console.log('Токен не найден. Переход на страницу авторизации.');
+      router.push("/");
+    }
+  }, [router]);
 
   return (
     <>

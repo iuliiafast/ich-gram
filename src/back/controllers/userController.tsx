@@ -4,7 +4,7 @@ import stream from 'stream';
 import upload from '../middlewares/multer.js';
 import cloudinary from '../config/cloudinaryConfig.js';
 import mongoose from 'mongoose';
-import { User, UpdateUserProfileBody, RequestWithFile } from '../types.js';
+import { UpdateUserProfileBody, RequestWithFile } from '../types.js';
 import UserModel from '../models/userModel.js';
 
 export const getUserProfile = async (req: Request, res: Response) => {

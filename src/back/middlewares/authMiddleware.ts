@@ -1,6 +1,6 @@
 import type { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../models/userModel.js';
+import UserModel from '../models/userModel.js';
 import { DecodedToken, CustomRequest, RequestWithUser, User } from '../types.js'
 
 // Middleware для аутентификации в Express
@@ -23,7 +23,7 @@ export const authMiddleware = async (req: CustomRequest & RequestWithUser, res: 
       return res.status(401).json({ message: 'Неверный токен.' });
     }
     // Проверяем пользователя в базе данных
-    const user = await User.findById(decoded.user_id).exec();
+    const user = await UserModel.findById(decoded.user_id).exec();
     if (!user) {
       return res.status(401).json({ message: 'Пользователь не найден.' });
     }

@@ -32,7 +32,8 @@ export default async function MainPage() {
         <p>Это защищённая страница.</p>
       </div>
     );
-  } catch (error) {
+  } catch (Error);
+  {
     return <p style={{ color: 'red' }}>Ошибка авторизации или получения данных.</p>;
   }
 }

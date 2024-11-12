@@ -14,10 +14,31 @@ export const LoginForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
       const response = await axios.post("/api/auth/login", userObject, { withCredentials: true });
       if (response.data.token) {
         Cookies.set("token", response.data.token, { expires: 7 });
+
+        // Подключение к WebSocket после успешного логина
+        const socketConnection = io('http://localhost:3000', {
+          extraHeaders: {
+            Authorization: `Bearer ${response.data.token}`,
+          },
+        });
+
+        socketConnection.on('connect', () => {
+          console.log('WebSocket: Подключение успешно установлено!');
+        });
+
+        socketConnection.on('message', (data) => {
+          console.log('WebSocket: ', data);
+        });
+
+        socketConnection.on('connect_error', (err) => {
+          console.log('WebSocket ошибка подключения:', err.message);
+        });
+
         router.push("/profile");
       }
     } catch (err: unknown) {

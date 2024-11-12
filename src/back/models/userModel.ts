@@ -34,6 +34,6 @@ userSchema.index({ email: 1 });
 userSchema.index({ username: 1 });
 
 // Модель пользователя с типом IUser
-const User = mongoose.model<IUser>('User', userSchema);
+const UserModel = mongoose.model<IUser>('User', userSchema);
 
-export default User;
+export default UserModel;

@@ -6,13 +6,12 @@ const WebSocketComponent = () => {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = Cookies.get('token'); // Получаем токен из cookies
+    const token = Cookies.get('token');
 
     if (token) {
-      // Подключение к WebSocket серверу с передачей токена через auth
       const socketConnection = io('http://localhost:3000', {
-        auth: { token }, // Используем auth для передачи токена
-        path: '/socket.io', // Путь, по которому доступен WebSocket сервер
+        auth: { token },
+        path: '/socket.io',
       });
 
       socketConnection.on('connect', () => {
@@ -21,7 +20,7 @@ const WebSocketComponent = () => {
 
       socketConnection.on('receive_message', (data) => {
         console.log('Получено сообщение:', data);
-        setMessage(data.message); // Обновляем состояние с полученным сообщением
+        setMessage(data.message);
       });
 
       socketConnection.on('disconnect', () => {
@@ -41,12 +40,7 @@ const WebSocketComponent = () => {
   }, []); // useEffect с пустым массивом зависимостей, вызывается только один раз
 
   return (
-    <div>
-      <h1>WebSocket Component</h1>
-      <div>
-        <p>Полученное сообщение: {message}</p>
-      </div>
-    </div>
+    <div> {message}</div>
   );
 };
 

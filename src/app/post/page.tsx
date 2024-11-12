@@ -1,81 +1,82 @@
 "use client";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import Sidebar from '../../components/Sidebar';
+import Cookies from 'js-cookie';
+import { useEffect, useState } from 'react';
 
-type PostProps = {
-  postId: number;
-  initialLikes: number;
+type UserProfileResponse = {
+  username: string;
 };
 
-type FeedProps = {
-  posts: Array<{ id: number; imageUrl: string; description: string; likes: number }>;
-  notifications: Array<{ id: number; message: string }>;
+type ErrorProps = {
+  message: string;
 };
 
-function Post({ postId, initialLikes }: PostProps) {
-  const [likes, setLikes] = useState(initialLikes);
+const ErrorMessage = ({ message }: ErrorProps) => (
+  <div className="text-red-500 text-center mt-4">{message}</div>
+);
 
-  const handleLike = async () => {
-    try {
-      await axios.post(`/api/like`, { postId });
-      setLikes(likes + 1);
-    } catch (error) {
-      console.error("Error liking the post:", error);
-    }
-  };
+async function fetchUserProfile(token: string): Promise<string> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-  return (
-    <div>
-      <button onClick={handleLike}>❤️ {likes}</button>
-    </div>
-  );
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Ошибка загрузки профиля");
+  }
+
+  const data: UserProfileResponse = await response.json();
+  return data.username;
 }
 
-export default function FeedPage() {
-  const [data, setData] = useState<FeedProps | null>(null);
+export default function MainPage() {
+  const [username, setUsername] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchFeedData = async () => {
-      try {
-        const [postsResponse, notificationsResponse] = await axios.all([
-          axios.get("/api/posts"),
-          axios.get("/api/notifications"),
-        ]);
+    const token = Cookies.get('token');
 
-        setData({
-          posts: postsResponse.data,
-          notifications: notificationsResponse.data,
-        });
-      } catch (error) {
-        console.error("Error loading feed data:", error);
-      }
-    };
+    if (!token) {
+      setErrorMessage("Вы не авторизованы. Пожалуйста, войдите в систему.");
+      return;
+    }
 
-    fetchFeedData();
+    // Получаем профиль пользователя с помощью токена
+    fetchUserProfile(token)
+      .then(setUsername)
+      .catch((error) => {
+        console.error("Ошибка загрузки профиля:", error);
+        setErrorMessage(error.message || "Ошибка загрузки профиля");
+      });
   }, []);
 
-  if (!data) return <p>Loading...</p>;
+  if (errorMessage) {
+    return <ErrorMessage message={errorMessage} />;
+  }
 
   return (
-    <div>
-      <h2>Posts</h2>
-      <div className="posts">
-        {data.posts.map((post) => (
-          <div key={post.id}>
-            // eslint-disable-next-line react/jsx-no-undef
-            <img src={post.imageUrl} alt={post.description} />
-            <p>{post.description}</p>
-            <Post postId={post.id} initialLikes={post.likes} />
-          </div>
-        ))}
+    <div className="flex h-screen bg-gray-100">
+      <Sidebar />
+      <div className="ml-64 p-6 flex-grow bg-white shadow-md rounded-lg m-4">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-4">
+          Добро пожаловать, {username}!
+        </h1>
+        <div className="content-area">
+          <section className="main-section">
+            <main role="main">
+              <div className="posts-container">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid-content p-4 bg-gray-50 rounded-lg shadow-lg">
+                    <p>Это ваш защищённый контент.</p>
+                  </div>
+                </div>
+              </div>
+            </main>
+          </section>
+        </div>
       </div>
-
-      <h2>Notifications</h2>
-      <ul>
-        {data.notifications.map((notification) => (
-          <li key={notification.id}>{notification.message}</li>
-        ))}
-      </ul>
     </div>
   );
 }

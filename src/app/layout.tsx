@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./styles/globals.css";
-import { ModalProvider } from './context/ModalContext'; // Импорт ModalProvider
-import Modal from './components/Modal'; // Импорт компонента Modal
+import { ModalProvider } from '../components/ModalContext';
+import Modal from '../components/Modal';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

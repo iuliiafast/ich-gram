@@ -1,19 +1,19 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import authRoutes from './src/back/routes/authRoutes.js';
-import userRoutes from './src/back/routes/userRoutes.js';
-import postRoutes from './src/back/routes/postRoutes.js';
-import commentRoutes from './src/back/routes/commentRoutes.js';
-import searchRoutes from './src/back/routes/searchRoutes.js';
-import likeRoutes from './src/back/routes/likeRoutes.js';
-import followRoutes from './src/back/routes/followRoutes.js';
-import notificationRoutes from './src/back/routes/notificationRoutes.js';
+import authRoutes from './src/dist/routes/authRoutes.js';
+import userRoutes from './src/dist/routes/userRoutes.js';
+import postRoutes from './src/dist/routes/postRoutes.js';
+import commentRoutes from './src/dist/routes/commentRoutes.js';
+import searchRoutes from './src/dist/routes/searchRoutes.js';
+import likeRoutes from './src/dist/routes/likeRoutes.js';
+import followRoutes from './src/dist/routes/followRoutes.js';
+import notificationRoutes from './src/dist/routes/notificationRoutes.js';
 import { specs, swaggerUi } from './swagger.js';
-import connectDB from './src/back/config/db.js';
-import { messageSocketHandler, authenticateSocket } from './src/back/routes/messageRoutes.tsx';
+import connectDB from './src/dist/config/db.js';
+import { messageSocketHandler, authenticateSocket } from './src/dist/routes/messageRoutes.js';
 import next from 'next';
-import upload from './src/back/middlewares/multer.js';
+import upload from './src/dist/middlewares/multer.js';
 import http from 'http';
 import { Server } from 'socket.io';
 
@@ -42,7 +42,9 @@ nextApp.prepare().then(() => {
     path: '/socket.io',
     cors: {
       origin: "*", // Разрешить запросы с любого домена (можно сузить в продакшн)
-      methods: ["GET", "POST"]
+      methods: ["GET", "POST"],
+      allowedHeaders: ["Authorization"],
+      credentials: true,  // Разрешить отправку cookies
     }
   });
 
