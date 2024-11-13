@@ -8,22 +8,26 @@ const PostFeed = () => {
   const [posts, setPosts] = useState<Post[]>([]);  // Состояние для постов
   const [loading, setLoading] = useState(false);  // Состояние загрузки
   const [error, setError] = useState<string | null>(null);  // Состояние ошибки
-  const [isEmptyFeed, setIsEmptyFeed] = useState(false);  // Состояние, что лента пуста
+  const [hasFetchedEmptyFeed, setHasFetchedEmptyFeed] = useState(false);  // Проверка на пустой запрос
+  const [isEmptyFeed, setIsEmptyFeed] = useState(false);  // Состояние пустого фида
 
   useEffect(() => {
     const fetchPosts = async () => {
+      if (hasFetchedEmptyFeed) return;
+
       setLoading(true);
       setError(null);
-      setIsEmptyFeed(false);
 
       try {
-        const response = await axios.get("http: localhost: 3000/api/post");
+        const response = await axios.get("/api/post");
         const postsData: Post[] = response.data;
 
-        if (!postsData || postsData.length === 0) {
+        if (Array.isArray(postsData) && postsData.length === 0) {
           setIsEmptyFeed(true);
+          setHasFetchedEmptyFeed(true); // Устанавливаем флаг, чтобы остановить повторные запросы
         } else {
           setPosts(postsData);
+          setIsEmptyFeed(false);
         }
       } catch (error) {
         setError("Не удалось загрузить посты. Попробуйте позже.");
@@ -52,7 +56,6 @@ const PostFeed = () => {
         {posts.map((post) => (  // Правильный синтаксис стрелочной функции
           <PostComponent key={post.user_id.toString()} post={post} />
         ))}
-
       </ul>
     </div>
   );

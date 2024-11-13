@@ -2,13 +2,14 @@
 import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
-import LoginForm from "../components/LoginForm"; // Импортируем как компонент, не через {}
 
 const Sidebar = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const userId = "12345"; // замените на реальное получение userId
 
   const menuItems = [
     { name: "Home", path: "/", iconSrc: "/sidebar/haus.svg" },
@@ -17,6 +18,7 @@ const Sidebar = () => {
     { name: "Messages", path: "/messages", iconSrc: "/sidebar/mess.svg" },
     { name: "Notifications", path: "/notifications", iconSrc: "/sidebar/herz.svg" },
     { name: "Create", path: "/post", iconSrc: "/sidebar/add.svg" },
+    { name: "Profile", path: `/app/profile/${userId}`, iconSrc: "/sidebar/add.svg" }, // Путь на клиентский профиль
   ];
 
   return (
@@ -36,13 +38,6 @@ const Sidebar = () => {
           </button>
         ))}
       </nav>
-
-      <div className="my-4">
-        <LoginForm setError={setError} setIsLoading={setIsLoading} />
-
-        {error && <p className="text-red-500 text-center mt-2">{error}</p>}
-        {isLoading && <p className="text-center">Загрузка...</p>}
-      </div>
     </div>
   );
 };

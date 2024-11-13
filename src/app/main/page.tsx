@@ -13,7 +13,7 @@ const Main = () => {
         <div className="flex-grow p-6"> {/* Добавим класс для отступов */}
           {/* Можно добавить дополнительный контент, если нужно */}
         </div>
-        <Postfeed />
+        <PostFeed />
       </div>
       <div>
         <Footer />
