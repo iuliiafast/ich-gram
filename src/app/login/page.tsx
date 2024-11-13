@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import Container from '../../components/Container';
-import { LoginForm } from '../../components/LoginForm';
+import LoginForm from '../../components/LoginForm';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -24,8 +24,14 @@ export default function LoginPage() {
         <Container>
           <div className="flex flex-col items-center border rounded-lg p-8 w-full max-w-md bg-white shadow-md">
             <Image src="/logo.svg" alt="logo" width={190} height={107} priority />
-            {/* Вставляем компонент LoginForm */}
             <LoginForm />
+            <div className="flex items-center mt-6">
+              <hr className="flex-grow border-t border-gray-300" />
+              <span className="px-2 text-gray-500">OR</span>
+              <hr className="flex-grow border-t border-gray-300" />
+            </div>
+
+            <Link href="/reset" className="text-blue-600 hover:underline">Forgot password?</Link>
           </div>
 
           <div className="flex flex-raw items-center border rounded-lg p-8 w-full max-w-md bg-white shadow-md">

@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { ImageForm } from "./ImageForm";
+import { ImageForm } from "./ImageForm";  // Предполагаю, что у вас есть компонент ImageForm
 
 const PostForm: React.FC = () => {
   const [content, setContent] = useState<string>("");
@@ -26,16 +26,12 @@ const PostForm: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await axios.post(
-        "/api/post",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post("/api/post", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       setSuccessMessage("Пост успешно создан!");
       setContent("");
@@ -72,7 +68,7 @@ const PostForm: React.FC = () => {
           />
         </div>
 
-        <ImageForm setImage={setImage} />
+        <ImageForm setImage={setImage} />  {/* Передаем функцию setImage в компонент ImageForm */}
 
         <button type="submit" disabled={loading}>
           {loading ? "Публикуется..." : "Опубликовать пост"}

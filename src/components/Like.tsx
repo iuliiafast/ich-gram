@@ -14,7 +14,7 @@ interface Post {
   likes_count: number;
 }
 
-const LikePage = () => {
+const Like = () => {
   const [likes, setLikes] = useState<Like[]>([]);
   const [post, setPost] = useState<Post | null>(null);
   const [isLiked, setIsLiked] = useState(false);
@@ -88,4 +88,4 @@ const LikePage = () => {
   );
 };
 
-export default LikePage;
+export default Like;

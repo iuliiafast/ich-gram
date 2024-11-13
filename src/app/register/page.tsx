@@ -59,7 +59,7 @@ const RegisterPage = () => {
     }
 
     try {
-      const response = await axios.post("/api/auth/register", userObject);
+      const response = await axios.post("http://localhost:3000/api/auth/register", userObject);
       if (response.data?.token) {
         Cookies.set("token", response.data.token, { expires: 7, sameSite: "lax", secure: false });
         router.push(`/main`);

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import axios from "axios";
+import Image from "next/image"
 
 type SearchResult = {
   id: number;
@@ -58,7 +59,11 @@ export default function SearchPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {results.map((result) => (
           <div key={result.id} className="border rounded-lg shadow p-4">
-            <img src={result.imageUrl} alt={result.name} className="w-full h-48 object-cover rounded mb-2" />
+            <Image src=
+              {result.imageUrl} alt=
+              {result.name} className=
+              "w-full h-48 object-cover rounded mb-2"
+            />
             <h2 className="font-bold text-lg">{result.name}</h2>
             <p>{result.description}</p>
           </div>

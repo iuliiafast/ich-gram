@@ -1,7 +1,7 @@
 import { Types, Document } from 'mongoose';
 import { Request, Response } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
-import User from './models/userModel';
+import User from '../back/models/userModel';
 // Интерфейс для профиля пользователя
 export interface UserProfile {
   _id: string;

@@ -16,7 +16,7 @@ interface ProfileFormProps {
   userId: string;
 }
 
-const ProfileForm = ({ userId }: ProfileFormProps) => {
+const EditProfile = ({ userId }: ProfileFormProps) => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [bio, setBio] = useState<string>("");
@@ -162,4 +162,4 @@ const ProfileForm = ({ userId }: ProfileFormProps) => {
   );
 };
 
-export default ProfileForm;
+export default EditProfile;

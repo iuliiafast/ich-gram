@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import User from '../models/userModel.js';
 import generateToken from '../config/jwt.js';
+import Profile from '../models/profileModel.js';
 
 export const register = async (req, res) => {
     const { email, password, full_name, username, bio, avatar } = req.body;
@@ -20,7 +21,9 @@ export const register = async (req, res) => {
 
         // Создание профиля для пользователя
         const profile = new Profile({
-            user: user._id, // Ссылка на созданного пользователя
+            userId: user._id, // Ссылка на созданного пользователя
+            username,
+            fullname: full_name,
             bio,
             avatar
         });
@@ -64,10 +67,11 @@ export const login = async (req, res) => {
         }
 
         // Генерация токена
-        const token = generateToken(user);
+        const token = generateToken({ id: user._id });
 
-        // Отправка ответа с токеном и данными пользователя
-        res.status(200).json({ token, user });
+        // Убираем пароль из данных пользователя перед отправкой
+        const { password, ...userWithoutPassword } = user._doc;
+        res.status(200).json({ token, user: userWithoutPassword });
 
     } catch (error) {
         console.error("Ошибка при логине:", error);
