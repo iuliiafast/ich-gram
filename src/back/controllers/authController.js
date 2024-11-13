@@ -3,7 +3,7 @@ import User from '../models/userModel.js';
 import generateToken from '../config/jwt.js';
 
 export const register = async (req, res) => {
-    const { email, password, full_name, username } = req.body;
+    const { email, password, full_name, username, bio, avatar } = req.body;
     try {
         const existingUser = await User.findOne({ $or: [{ email }, { username }] });
         if (existingUser) {
@@ -17,8 +17,18 @@ export const register = async (req, res) => {
             full_name
         });
         await user.save();
+
+        // Создание профиля для пользователя
+        const profile = new Profile({
+            user: user._id, // Ссылка на созданного пользователя
+            bio,
+            avatar
+        });
+        await profile.save();
+
+
         const token = generateToken(user);
-        res.status(201).json({ token, user, message: 'Регистрация успешна!' });
+        res.status(201).json({ token, user, profile, message: 'Регистрация успешна!' });
     }
     catch (error) {
         console.error("Ошибка при регистрации:", error);
@@ -54,7 +64,7 @@ export const login = async (req, res) => {
         }
 
         // Генерация токена
-        const token = generateToken(user);  // Здесь предполагается, что generateToken - это функция для генерации JWT
+        const token = generateToken(user);
 
         // Отправка ответа с токеном и данными пользователя
         res.status(200).json({ token, user });

@@ -1,12 +1,13 @@
 import Comment from '../models/commentModel.js';
 import Post from '../models/postModel.js';
-// Получение комментариев к посту
+
 export const getPostComments = async (req, res) => {
     try {
         const comments = await Comment.find({ post_id: req.params.postId });
         res.status(200).json(comments);
     }
     catch (error) {
+        console.error("Error fetching comments:", error);
         res.status(500).json({ error: 'Ошибка при получении комментариев' });
     }
 };
@@ -30,6 +31,7 @@ export const createComment = async (req, res) => {
         res.status(201).json(comment);
     }
     catch (error) {
+        console.error('Error creating comment:', error);
         res.status(500).json({ error: 'Ошибка при создании комментария' });
     }
 };
@@ -47,6 +49,7 @@ export const deleteComment = async (req, res) => {
         res.status(200).json({ message: 'Комментарий удалён' });
     }
     catch (error) {
+        console.error('Error deleting comment:', error);
         res.status(500).json({ error: 'Ошибка при удалении комментария' });
     }
 };

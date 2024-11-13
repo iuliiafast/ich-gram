@@ -1,15 +1,15 @@
 "use client";
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { ImageForm } from "./ImageForm";
 
-const PostForm = () => {
+const PostForm: React.FC = () => {
   const [content, setContent] = useState<string>("");
   const [image, setImage] = useState<File | null>(null);
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const token = Cookies.get("token");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,12 +25,13 @@ const PostForm = () => {
     if (image) formData.append("image", image);
 
     try {
+      setLoading(true);
       const response = await axios.post(
-        "/api/posts",
+        "/api/post",
         formData,
         {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
         }
@@ -41,25 +42,19 @@ const PostForm = () => {
       setImage(null);
       setError("");
 
-      // Обновляем состояние или выполняем другие действия после успешного создания поста
       console.log("Пост создан:", response.data);
-    } catch (error: unknown) {
+    } catch (error) {
       console.error("Ошибка при создании поста:", error);
-
-      // Проверяем, является ли ошибка ошибкой Axios
       if (axios.isAxiosError(error)) {
         setError(
           error.response?.data?.message || "Не удалось создать пост. Попробуйте снова."
         );
-      } else if (error instanceof Error) {
-        // Если это обычная ошибка (не от Axios)
-        setError(error.message || "Неизвестная ошибка при создании поста.");
       } else {
-        // Если ошибка не является экземпляром Error или AxiosError
         setError("Неизвестная ошибка.");
       }
-
-      setSuccessMessage(""); // Сбрасываем успешное сообщение
+      setSuccessMessage("");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,10 +72,11 @@ const PostForm = () => {
           />
         </div>
 
-        {/* Передаем setImage в компонент ImageForm */}
         <ImageForm setImage={setImage} />
 
-        <button type="submit">Опубликовать пост</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Публикуется..." : "Опубликовать пост"}
+        </button>
       </form>
 
       {error && <p className="text-red-500">{error}</p>}

@@ -10,9 +10,6 @@
       ],
       "@styles/*": [
         "src/app/styles/*"
-      ],
-      "@back/*": [
-        "src/back/*"
       ]
     },
     "target": "ES2017",
@@ -45,7 +42,6 @@
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
-    "./src/back"
   ],
   "exclude": [
     "node_modules",

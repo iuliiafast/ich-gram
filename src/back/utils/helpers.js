@@ -6,6 +6,7 @@ const getUserIdFromToken = (token) => {
         throw new Error('JWT_SECRET не задан в переменных окружения.');
     }
     if (!token) {
+        console.error('Ошибка: Токен не предоставлен.');
         throw new Error('Токен не предоставлен.');
     }
     try {
@@ -14,6 +15,7 @@ const getUserIdFromToken = (token) => {
             return decoded.user_id;
         }
         else {
+            console.error('Ошибка: user_id не найден в токене');
             throw new Error('user_id не найден в токене');
         }
     }

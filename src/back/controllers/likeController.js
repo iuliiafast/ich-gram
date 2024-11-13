@@ -7,6 +7,7 @@ export const getPostLikes = async (req, res) => {
         res.status(200).json(likes);
     }
     catch (error) {
+        console.error('Error getting likes:', error);
         res.status(500).json({ error: 'Ошибка при получении лайков' });
     }
 };
@@ -31,6 +32,7 @@ export const likePost = async (req, res) => {
         res.status(201).json(like);
     }
     catch (error) {
+        console.error('Error liking the post:', error);
         res.status(500).json({ error: 'Ошибка при лайке поста' });
     }
 };
@@ -48,6 +50,7 @@ export const unlikePost = async (req, res) => {
         res.status(200).json({ message: 'Лайк удалён' });
     }
     catch (error) {
+        console.error('Error removing the like:', error);
         res.status(500).json({ error: 'Ошибка при удалении лайка' });
     }
 };

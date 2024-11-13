@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
 type Notification = {
@@ -11,7 +11,7 @@ const Notifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
-    const socket: Socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000");
+    const socket: Socket = io(process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000");
 
     socket.on("newNotification", (data: Notification) => {
       console.log("New Notification:", data);

@@ -1,12 +1,12 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import Cookies from "js-cookie";
-import ProfileForm from "@components/ProfileForm";
-import Footer from "@components/Footer";
-import PostFeed from "@components/PostFeed";
-import Sidebar from "@components/Sidebar";
+import ProfileForm from "../../../components/ProfileForm";
+import Footer from "../../../components/Footer";
+import PostFeed from "../../../components/PostFeed";
+import Sidebar from "../../../components/Sidebar";
 
 interface UserProfile {
   username: string;
@@ -23,7 +23,7 @@ interface Post {
 }
 
 const ProfilePage = () => {
-  const { userId } = useParams();
+  /*const { userId } = useParams();
   const validUserId = Array.isArray(userId) ? userId[0] : userId;
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -82,7 +82,7 @@ const ProfilePage = () => {
     };
 
     fetchProfileAndPosts();
-  }, [validUserId, token]);
+  }, [validUserId, token]);*/
 
   return (
     <>

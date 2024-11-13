@@ -7,6 +7,7 @@ export const getUserNotifications = async (req, res) => {
         res.status(200).json(notifications);
     }
     catch (error) {
+        console.error('Error fetching notifications:', error);
         res.status(500).json({ error: 'Ошибка при получении уведомлений' });
     }
 };
@@ -28,6 +29,7 @@ export const createNotification = async (req, res) => {
         res.status(201).json(notification);
     }
     catch (error) {
+        console.error('Error creating notification:', error);
         res.status(500).json({ error: 'Ошибка при создании уведомления' });
     }
 };
@@ -42,6 +44,7 @@ export const deleteNotification = async (req, res) => {
         res.status(200).json({ message: 'Уведомление удалено' });
     }
     catch (error) {
+        console.error('Error deleting notification:', error);
         res.status(500).json({ error: 'Ошибка при удалении уведомления' });
     }
 };
@@ -57,6 +60,7 @@ export const updateNotificationStatus = async (req, res) => {
         res.status(200).json(notification);
     }
     catch (error) {
+        console.error('Error updating notification status:', error);
         res.status(500).json({ error: 'Ошибка при обновлении статуса уведомления' });
     }
 };

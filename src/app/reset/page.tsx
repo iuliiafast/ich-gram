@@ -1,13 +1,13 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+//import { useRouter } from "next/navigation";
 import axios from "axios";
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
+  //const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,6 +18,7 @@ export default function ResetPasswordPage() {
       const response = await axios.post("/api/reset-password", { email });
       setMessage(response.data.message || "Check your email for reset instructions.");
     } catch (error) {
+      console.error("Error resetting password:", error);
       setMessage("An error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);

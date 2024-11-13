@@ -7,6 +7,7 @@ export const getUserFollowers = async (req, res) => {
         res.status(200).json(followers);
     }
     catch (error) {
+        console.error('Error fetching followers:', error);
         res.status(500).json({ error: 'Ошибка при получении подписчиков' });
     }
 };
@@ -18,6 +19,7 @@ export const getUserFollowing = async (req, res) => {
         res.status(200).json(following);
     }
     catch (error) {
+        console.error('Error fetching subscription list:', error);
         res.status(500).json({ error: 'Ошибка при получении списка подписок' });
     }
 };
@@ -49,6 +51,7 @@ export const followUser = async (req, res) => {
         res.status(201).json(follow);
     }
     catch (error) {
+        console.error('Error subscribing to user:', error);
         res.status(500).json({ error: 'Ошибка при подписке на пользователя' });
     }
 };
@@ -70,6 +73,7 @@ export const unfollowUser = async (req, res) => {
         res.status(200).json({ message: 'Вы отписались от пользователя' });
     }
     catch (error) {
+        console.error('Error unsubscribing from user:', error);
         res.status(500).json({ error: 'Ошибка при отписке от пользователя' });
     }
 };

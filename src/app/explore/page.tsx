@@ -1,16 +1,8 @@
-// Import necessary libraries and components
+"use client";
 import React from 'react';
 import Image from 'next/image';
 
-const mockImages = [
-  '/images/img1.jpg',
-  '/images/img2.jpg',
-  '/images/img3.jpg',
-  '/images/img4.jpg',
-  '/images/img5.jpg',
-  '/images/img6.jpg',
-  // Add more image paths here or fetch them from an API
-];
+const mockImages = [];
 
 const ExplorePage = () => {
   return (

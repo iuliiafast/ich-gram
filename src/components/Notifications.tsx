@@ -2,12 +2,18 @@
 import React, { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 
+// Определяем интерфейс для уведомлений
+interface Notification {
+  message: string;
+  // Можно добавить дополнительные поля, если они есть в данных уведомлений
+}
+
 const Notifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
     // Подключаем сокет при монтировании компонента
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3000";
+    const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
     const socket: Socket = io(socketUrl);
 
 

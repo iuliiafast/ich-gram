@@ -1,4 +1,5 @@
-import { CldImage } from 'next-cloudinary';
+import React from 'react';
+import CldImage from 'next-cloudinary';
 
 interface CldImageComponentProps {
   src: string;
