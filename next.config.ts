@@ -5,6 +5,12 @@ const nextConfig: NextConfig = {
   // Включает строгий режим React для обнаружения потенциальных проблем
   reactStrictMode: true,
 
+
+  images: {
+    domains: ['res.cloudinary.com'],
+  },
+
+
   // Настройки перенаправлений (rewrites)
   async rewrites() {
     return [

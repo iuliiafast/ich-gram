@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Sidebar from "../../components/Sidebar";
 
 type Message = {
   id: number;
@@ -11,8 +12,6 @@ type Message = {
 export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
-
-  // Загружаем сообщения при загрузке компонента
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -42,31 +41,34 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Сообщения</h1>
-      <div className="bg-gray-100 p-4 rounded-lg shadow-md mb-4 h-64 overflow-y-auto">
-        {messages.map((message) => (
-          <div key={message.id} className="mb-2 p-2 bg-white rounded-lg shadow">
-            <p className="font-bold">{message.sender}</p>
-            <p>{message.content}</p>
-          </div>
-        ))}
+    <>
+      <Sidebar />
+      <div className="p-4">
+        <h1 className="text-2xl font-bold mb-4">Сообщения</h1>
+        <div className="bg-gray-100 p-4 rounded-lg shadow-md mb-4 h-64 overflow-y-auto">
+          {messages.map((message) => (
+            <div key={message.id} className="mb-2 p-2 bg-white rounded-lg shadow">
+              <p className="font-bold">{message.sender}</p>
+              <p>{message.content}</p>
+            </div>
+          ))}
+        </div>
+        <div className="flex">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Напишите сообщение..."
+            className="flex-1 border border-gray-300 rounded-l-lg p-2"
+          />
+          <button
+            onClick={handleSendMessage}
+            className="bg-blue-500 text-white px-4 py-2 rounded-r-lg hover:bg-blue-600"
+          >
+            Отправить
+          </button>
+        </div>
       </div>
-      <div className="flex">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Напишите сообщение..."
-          className="flex-1 border border-gray-300 rounded-l-lg p-2"
-        />
-        <button
-          onClick={handleSendMessage}
-          className="bg-blue-500 text-white px-4 py-2 rounded-r-lg hover:bg-blue-600"
-        >
-          Отправить
-        </button>
-      </div>
-    </div>
+    </>
   );
 }
