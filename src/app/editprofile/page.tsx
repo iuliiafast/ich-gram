@@ -1,194 +1,174 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
+import { useParams } from "next/navigation";
 import axios, { AxiosError } from "axios";
-import AvatarUpload from "../../components/AvatarUpload";
 import Cookies from "js-cookie";
-import Image from 'next/image';
-import Sidebar from '../../components/Sidebar';
-import Footer from '../../components/Footer';
+import Image from "next/image";
+import AvatarUpload from "../../../components/AvatarUpload"; // Путь к компоненту загрузки аватара
+import { UserProfile } from "../../../utils/types";
 
-interface UserProfile {
-  username: string;
-  bio: string;
-  profile_image?: string;
-}
-
-interface ProfileFormProps {
-  userProfile: UserProfile;
-  userId: string;
-}
-
-const EditProfile = ({ userId }: ProfileFormProps) => {
+const ProfilePage = () => {
+  const { userId } = useParams(); // Извлекаем userId из параметров маршрута
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
   const [bio, setBio] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const [avatarUrl, setAvatarUrl] = useState<string>("/default-avatar.png");
+  const [website, setWebsite] = useState<string>(""); // Для нового поля website
   const [successMessage, setSuccessMessage] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const token = Cookies.get("token");
 
-  // Функция загрузки данных пользователя
-  const fetchUserData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`/api/user/profile/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
-
-      // Данные успешно получены, обновляем состояния
-      const { name, email, bio, avatar } = response.data;
-      setName(name || "");
-      setEmail(email || "");
-      setBio(bio || "");
-      setAvatarUrl(avatar || "/default-avatar.png");  // Устанавливаем дефолтный аватар
-    } catch (error) {
-      // Обработка ошибок
-      if (axios.isAxiosError(error)) {
-        if (error.response) {
-          setError(`Ошибка: ${error.response.data?.message || 'Неизвестная ошибка'}`);
-          console.error('Response error:', error.response);
-        } else if (error.request) {
-          setError('Не удалось получить данные. Пожалуйста, попробуйте позже.');
-          console.error('Request error:', error.request);
-        }
-      } else {
-        setError('Произошла ошибка при подключении.');
-        console.error('Connection error:', error);
-      }
-      setAvatarUrl("/default-avatar.png");  // В случае ошибки устанавливаем дефолтный аватар
-    } finally {
-      setIsLoading(false); // Завершаем загрузку вне зависимости от результата запроса
-    }
-  }, [userId, token]);
-
   useEffect(() => {
     if (!userId || !token) {
-      setError("Необходимо авторизоваться или предоставить корректный userId.");
+      setErrorMessage("Не удалось авторизоваться или отсутствует идентификатор пользователя.");
       return;
     }
 
-    fetchUserData();
-  }, [userId, token, fetchUserData]);
+    const fetchProfile = async () => {
+      setIsLoading(true);
+      try {
+        const profileResponse = await axios.get(`/api/user/profile/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const profileData = profileResponse.data;
+        setUserProfile(profileData);
+        setName(profileData.username || "");
+        setBio(profileData.bio || "");
+        setAvatarUrl(profileData.profile_image || "/default-avatar.png");
+        setWebsite(profileData.website || ""); // Загружаем данные о вебсайте, если они есть
+      } catch (error) {
+        const axiosError = error as AxiosError<{ message?: string }>;
+        setErrorMessage(axiosError.response?.data?.message || "Ошибка при загрузке данных");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Обработчик формы
-  const handleSubmit = async (e: React.FormEvent) => {
+    fetchProfile();
+  }, [userId, token]);
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !bio) {
-      setError("Пожалуйста, заполните все поля.");
-      return;
-    }
-
     setIsLoading(true);
-    setError("");
+    setErrorMessage("");
     setSuccessMessage("");
 
     try {
       await axios.put(
         `/api/user/profile/${userId}`,
-        { name, bio },
+        { username: name, bio, website }, // Добавляем website в запрос
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       setSuccessMessage("Профиль успешно обновлен!");
-    } catch (error: unknown) {
+    } catch (error) {
       const err = error as AxiosError;
-      if (err.response && err.response.status === 400) {
-        setError("Некорректные данные. Проверьте введённую информацию.");
-      } else {
-        setError("Не удалось обновить профиль. Попробуйте снова.");
-      }
+      setErrorMessage(err.response?.data?.message || "Не удалось обновить профиль. Попробуйте снова.");
+    } finally {
+      setIsLoading(false);
     }
-
   };
 
   return (
-    <><div className="flex h-screen">
-      <Sidebar />
-      <h1>Edit profile</h1>
-      <div className="flex items-center space-x-4">
-        <AvatarUpload userId=
-          {userId} token=
-          {token!} onAvatarChange=
-          {setAvatarUrl}
-        />
-        <div className=
-          "relative">
-          {isLoading &&
-            <p>
-              Загрузка...
-            </p>}
-          {error &&
-            <p style={{ color: "red" }}>
-              {error}
-            </p>}
-          {successMessage &&
-            <p style=
-              {{ color: "green" }}>
-              {successMessage}
-            </p>}
-          {avatarUrl &&
-            <div>
-              <Image src=
-                {avatarUrl} alt=
-                "User Avatar"
-                width={150}
-                height={150}
-                placeholder="blur" // необязательно, добавляет эффект размытия до полной загрузки
-              />
-            </div>}
-        </div>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="name">
-              Username
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Введите имя"
-            />
-          </div>
-          <div>
-            <label htmlFor="email">
-              Website
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="<a></a>"
-            />
-          </div>
-          <div>
-            <label htmlFor="bio">About</label>
-            <textarea
-              id="bio"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="Введите биографию"
-            />
-          </div>
-          <button type="submit" disabled={isLoading}>
-            Save
-          </button>
-        </form>
+    <div className="container mx-auto p-4">
+      {isLoading ? (
+        <p>Загрузка...</p>
+      ) : errorMessage ? (
+        <p style={{ color: "red" }}>{errorMessage}</p>
+      ) : (
+        <>
+          <h1 className="text-2xl font-bold mb-4">Профиль {userProfile?.username}</h1>
 
-        <Footer />
-      </div>
+          {/* Блок с аватаром и кнопкой загрузки */}
+          <div className="shadow-lg p-4 mb-4">
+            <div className="flex items-center mb-4">
+              <div>
+                {avatarUrl && (
+                  <Image
+                    src={avatarUrl}
+                    alt="User Avatar"
+                    width={150}
+                    height={150}
+                    className="rounded-full"
+                  />
+                )}
+              </div>
+              <div className="ml-4">
+                <AvatarUpload userId={userId as string} token={token!} onAvatarChange={setAvatarUrl} />
+              </div>
+            </div>
+          </div>
+
+          {/* Дополнительный блок между аватаром и формой */}
+          <div className="shadow-lg p-4 mb-4">
+            <h2 className="text-xl font-bold mb-4">Информация о пользователе</h2>
+            <div className="mb-4">
+              <strong>Имя:</strong>
+              <p>{name}</p>
+            </div>
+            <div className="mb-4">
+              <strong>Биография:</strong>
+              <p>{bio}</p>
+            </div>
+            {website && (
+              <div className="mb-4">
+                <strong>Вебсайт:</strong>
+                <p>{website}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Форма для редактирования профиля */}
+          <div className="shadow-lg p-4 mb-4">
+            <form onSubmit={handleProfileUpdate}>
+              <div className="mb-4">
+                <label htmlFor="name" className="block">Имя:</label>
+                <input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Введите имя"
+                  className="border p-2 w-full"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="bio" className="block">Биография:</label>
+                <textarea
+                  id="bio"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Введите биографию"
+                  className="border p-2 w-full"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="website" className="block">Вебсайт:</label>
+                <input
+                  id="website"
+                  type="url"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  placeholder="Введите URL вашего вебсайта"
+                  className="border p-2 w-full"
+                />
+              </div>
+
+              <button type="submit" disabled={isLoading} className="bg-blue-500 text-white p-2 rounded">
+                Обновить профиль
+              </button>
+            </form>
+            {successMessage && <p style={{ color: "green", marginTop: "10px" }}>{successMessage}</p>}
+          </div>
+        </>
+      )}
     </div>
-    </>
   );
 };
 
-export default EditProfile;
+export default ProfilePage;

@@ -3,7 +3,7 @@ import { getUserProfile, updateUserProfile, uploadProfileImage } from '../contro
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 const router = express.Router();
 // Получение профиля пользователя
-router.get('/profile/:userId', getUserProfile);
+router.get('/profile/:userId', authMiddleware, getUserProfile);
 // Обновление профиля пользователя с загрузкой изображения
 router.put('/current', authMiddleware, uploadProfileImage, updateUserProfile);
 export default router;

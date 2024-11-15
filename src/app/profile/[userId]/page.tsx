@@ -1,39 +1,24 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // Используем useRouter для получения параметра userId
+import { useParams } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import Cookies from "js-cookie";
-import ProfileForm from "../../../components/ProfileForm";
+import EditProfile from "../../../components/EditProfile";
 import Footer from "../../../components/Footer";
 import PostFeed from "../../../components/PostFeed";
 import Sidebar from "../../../components/Sidebar";
-
-interface UserProfile {
-  username: string;
-  bio: string;
-  profile_image?: string;
-}
-
-interface Post {
-  id: string;
-  title: string;
-  content: string;
-  image?: string;
-  createdAt: string;
-}
+import { Post, UserProfile } from '../../../utils/types';
 
 const ProfilePage = () => {
-  const router = useRouter();
-  const { userId } = router.query; // Получаем userId из URL параметра
+  const userId = useParams();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const token = Cookies.get("token"); // Получаем токен из cookies
+  const token = Cookies.get("token");
 
   useEffect(() => {
-    // Проверка наличия userId и токена
     if (!userId) {
       setErrorMessage("Отсутствует идентификатор пользователя.");
       return;
@@ -56,22 +41,11 @@ const ProfilePage = () => {
           }),
         ]);
 
-        if (profileResponse.status === 200) {
-          setUserProfile(profileResponse.data);
-        } else {
-          throw new Error(`Ошибка при загрузке профиля: ${profileResponse.statusText}`);
-        }
-
-        if (postsResponse.status === 200) {
-          setPosts(postsResponse.data);
-        } else {
-          throw new Error(`Ошибка при загрузке постов: ${postsResponse.statusText}`);
-        }
+        setUserProfile(profileResponse.data);
+        setPosts(postsResponse.data);
       } catch (error: unknown) {
-        // Обработка ошибок
         if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError;
-          console.error("Ошибка при загрузке данных с сервера:", error.response?.data);
+          const axiosError = error as AxiosError<{ message?: string }>;
           setErrorMessage(axiosError.response?.data?.message || "Ошибка при загрузке данных");
         } else {
           setErrorMessage("Произошла непредвиденная ошибка при загрузке данных.");
@@ -83,7 +57,7 @@ const ProfilePage = () => {
     };
 
     fetchProfileAndPosts();
-  }, [userId, token]); // Зависимости useEffect
+  }, [userId, token]);
 
   return (
     <>
@@ -95,23 +69,16 @@ const ProfilePage = () => {
           <p className="text-red-500">{errorMessage}</p>
         ) : (
           <div>
-            {/* Профиль пользователя */}
             {userProfile ? (
               <>
                 <h1 className="text-2xl font-bold mb-4">Профиль {userProfile.username}</h1>
-                <ProfileForm userProfile={userProfile} userId={userId as string} />
+                <EditProfile userProfile={userProfile} userId={userId as string} />
               </>
             ) : (
               <p>Информация о пользователе недоступна.</p>
             )}
-
-            {/* Лента постов */}
             <h2 className="text-xl font-bold mt-8 mb-4">Посты</h2>
-            {posts.length > 0 ? (
-              <PostFeed posts={posts} />
-            ) : (
-              <p>У пользователя пока нет постов.</p>
-            )}
+            <PostFeed posts={posts} />
           </div>
         )}
       </div>

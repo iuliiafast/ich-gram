@@ -9,8 +9,6 @@ const Sidebar = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const userId = "12345"; // замените на реальное получение userId
-
   const menuItems = [
     { name: "Home", path: "/", iconSrc: "/sidebar/haus.svg" },
     { name: "Search", path: "/search", iconSrc: "/sidebar/search.svg" },
@@ -18,7 +16,6 @@ const Sidebar = () => {
     { name: "Messages", path: "/messages", iconSrc: "/sidebar/mess.svg" },
     { name: "Notifications", path: "/notifications", iconSrc: "/sidebar/herz.svg" },
     { name: "Create", path: "/post", iconSrc: "/sidebar/add.svg" },
-    { name: "Profile", path: `/app/profile/${userId}`, iconSrc: "/sidebar/add.svg" }, // Путь на клиентский профиль
   ];
 
   return (

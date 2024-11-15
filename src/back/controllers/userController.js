@@ -7,22 +7,31 @@ import UserModel from '../models/userModel.js';
 
 // Получение профиля пользователя
 export const getUserProfile = async (req, res) => {
-    const userId = req.params.userId;
-
-    // Проверка корректности формата ID
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.status(400).json({ message: 'Некорректный формат ID пользователя' });
-    }
-
     try {
-        const user = await UserModel.findById(userId).exec();
+        const userId = req.params.userId; // Получаем userId из параметров URL
+
+        // Ищем пользователя по userId
+        const user = await UserModel.findById(userId);
         if (!user) {
-            return res.status(404).json({ error: 'Пользователь не найден' });
+            // Если пользователь не найден, отправляем ошибку 404
+            return res.status(404).json({ message: 'Пользователь не найден' });
         }
-        res.status(200).json(user); // Отправляем данные пользователя
+
+        const userProfile = {
+            user_id: user._id,
+            username: user.username,
+            full_name: user.full_name,
+            posts_count: user.posts_count || 0,
+            followers_count: user.followers_count || 0,
+            following_count: user.following_count || 0,
+            avatar: user.avatar || 'default-avatar.jpg',
+            bio: user.bio || ''
+        };
+
+        res.status(200).json(userProfile);  // Отправляем данные профиля в ответ
     } catch (error) {
-        console.error('Ошибка при получении данных пользователя:', error);
-        res.status(500).json({ message: 'Ошибка получения профиля пользователя', error });
+        console.error('Ошибка при получении профиля:', error);
+        return res.status(500).json({ message: 'Ошибка сервера.' });
     }
 };
 
