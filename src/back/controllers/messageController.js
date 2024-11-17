@@ -1,14 +1,24 @@
 import Message from '../models/messageModel.js';
-// Загрузка истории сообщений
+
 export const loadMessages = async (userId, targetUserId, socket) => {
     try {
+        const someFunctionThatReturnsRoomId = () => {
+            return "roomId";
+        };
+
+        const roomId = someFunctionThatReturnsRoomId();
+        console.log(roomId);
+
+        // Загружаем последние 20 сообщений
         const messages = await Message.find({
             $or: [
-                { sender_id: userId, receiver_id: targetUserId },
-                { sender_id: targetUserId, receiver_id: userId },
+                { senderId: userId, receiverId: targetUserId },
+                { senderId: targetUserId, receiverId: userId },
             ],
-        }).sort({ created_at: 1 }); // Сортировка по времени
-        // Отправляем историю сообщений
+        }).sort({ createdAt: 1 })
+            .limit(20);
+
+        // Отправляем сообщения обратно на клиент
         socket.emit('loadMessages', messages);
     }
     catch (error) {
@@ -16,18 +26,19 @@ export const loadMessages = async (userId, targetUserId, socket) => {
         socket.emit('error', { error: 'Ошибка при загрузке сообщений' });
     }
 };
-// Отправка сообщения
+
 export const sendMessage = async (userId, targetUserId, messageText, roomId, io) => {
     try {
         const message = new Message({
-            sender_id: userId,
-            receiver_id: targetUserId,
-            message_text: messageText,
-            created_at: new Date(),
+            senderId: userId,
+            receiverId: targetUserId,
+            messageText: messageText,
+            createdAt: new Date(),
         });
-        await message.save(); // Сохранение сообщения в базе данных
-        // Отправляем сообщение всем пользователям в комнате
+        await message.save();
+
         io.to(roomId).emit('receiveMessage', message);
+        console.log('Сообщение отправлено:', message);
     }
     catch (error) {
         console.error('Ошибка при отправке сообщения:', error);

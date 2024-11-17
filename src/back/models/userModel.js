@@ -1,20 +1,40 @@
 import mongoose from 'mongoose';
-// Схема пользователя
-const userSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    full_name: { type: String, required: true },
-    bio: { type: String, default: '' },
-    profile_image: { type: String, default: '' },
-    followers_count: { type: Number, default: 0 },
-    following_count: { type: Number, default: 0 },
-    posts_count: { type: Number, default: 0 },
-    created_at: { type: Date, default: Date.now }
+import bcrypt from 'bcryptjs';
+
+const userSchema = new mongoose.Schema(
+    {
+        email: { type: String, required: true, unique: true },
+        userName: { type: String, required: true, unique: true },
+        fullName: { type: String, required: true },
+        password: { type: String, required: true },
+        avatar: { type: String, default: '/default-avatar.png' },
+        postsCount: { type: Number, default: 0 },
+        followersCount: { type: Number, default: 0 },
+        followingCount: { type: Number, default: 0 },
+        bio: { type: String, default: '' },
+        website: { type: String, default: '' },
+    }, { timestamps: true });
+
+userSchema.pre('save', async function (next) {
+    if (this.isModified('password')) {
+        try {
+            const salt = await bcrypt.genSalt(10);
+            this.password = await bcrypt.hash(this.password, salt);
+        } catch (err) {
+            return next(err);
+        }
+    }
+    next();
 });
-// Индексы для ускорения поиска
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
-// Модель пользователя с типом IUser
-const UserModel = mongoose.model('User', userSchema);
-export default UserModel;
+
+userSchema.set('toJSON', {
+    transform: (doc, ret) => {
+        delete ret.password;
+        return ret;
+    },
+});
+
+
+const User = mongoose.model('User', userSchema);
+
+export default User;

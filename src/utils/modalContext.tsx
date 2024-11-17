@@ -10,7 +10,7 @@ interface ModalContextType {
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
-export const ModalProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+export const ModalProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
 

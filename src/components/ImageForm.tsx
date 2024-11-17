@@ -4,11 +4,11 @@ import { $api } from "../utils/api";
 import axios from 'axios';
 import React from "react";
 
-type ImageFormProps = {
+type ImageForm = {
   setImage: React.Dispatch<React.SetStateAction<File | null>>;
 };
 
-export const ImageForm = ({ setImage }: ImageFormProps) => {
+export const ImageForm = ({ setImage }: ImageForm) => {
   const [file, setFile] = useState<File | null>(null);
   const [filePath, setFilePath] = useState<string>("");
   const [error, setError] = useState<string>("");

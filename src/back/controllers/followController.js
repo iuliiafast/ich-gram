@@ -1,9 +1,8 @@
 import Follow from '../models/followModel.js';
-import User from '../models/userModel.js';
-// Получение списка подписчиков пользователя
+import UserModel from '../models/userModel.js';
 export const getUserFollowers = async (req, res) => {
     try {
-        const followers = await Follow.find({ follower_user_id: req.params.userId }).populate('follower_user_id', 'username');
+        const followers = await Follow.find({ followerUserId: req.params.userId }).populate('followerUserId', 'userName');
         res.status(200).json(followers);
     }
     catch (error) {
@@ -11,11 +10,10 @@ export const getUserFollowers = async (req, res) => {
         res.status(500).json({ error: 'Ошибка при получении подписчиков' });
     }
 };
-// Получение списка, на кого подписан пользователь
 export const getUserFollowing = async (req, res) => {
     try {
         console.log(req.params.userId);
-        const following = await Follow.find({ followed_user_id: req.params.userId }).populate('followed_user_id', 'username');
+        const following = await Follow.find({ followedUserId: req.params.userId }).populate('followedUserId', 'userName');
         res.status(200).json(following);
     }
     catch (error) {
@@ -23,28 +21,26 @@ export const getUserFollowing = async (req, res) => {
         res.status(500).json({ error: 'Ошибка при получении списка подписок' });
     }
 };
-// Подписка на пользователя
 export const followUser = async (req, res) => {
     const { userId, targetUserId } = req.params;
     try {
-        const user = await User.findById(userId);
-        const targetUser = await User.findById(targetUserId);
+        const user = await UserModel.findById(userId);
+        const targetUser = await UserModel.findById(targetUserId);
         if (!user || !targetUser) {
             return res.status(404).json({ error: 'Пользователь не найден' });
         }
-        // To-Do
-        const existingFollow = await Follow.findOne({ follower_user_id: userId, followed_user_id: targetUserId });
+        const existingFollow = await Follow.findOne({ followerUserId: userId, followedUserId: targetUserId });
         if (existingFollow) {
             return res.status(400).json({ error: 'Вы уже подписаны на этого пользователя' });
         }
         const follow = new Follow({
-            follower_user_id: userId,
-            followed_user_id: targetUserId,
-            user_id: userId,
-            created_at: new Date(),
+            followerUserId: userId,
+            followedUserId: targetUserId,
+            userId: userId,
+            createdAt: new Date(),
         });
-        user.following_count += 1;
-        targetUser.followers_count += 1;
+        user.followingCount += 1;
+        targetUser.followersCount += 1;
         await user.save();
         await targetUser.save();
         await follow.save();
@@ -55,19 +51,18 @@ export const followUser = async (req, res) => {
         res.status(500).json({ error: 'Ошибка при подписке на пользователя' });
     }
 };
-// Отписка от пользователя
 export const unfollowUser = async (req, res) => {
     const { userId, targetUserId } = req.params;
     try {
-        const follow = await Follow.findOne({ follower_user_id: userId, followed_user_id: targetUserId });
+        const follow = await Follow.findOne({ followerUserId: userId, followedUserId: targetUserId });
         if (!follow) {
             return res.status(404).json({ error: 'Вы не подписаны на этого пользователя' });
         }
         await Follow.findByIdAndDelete(follow._id);
-        const user = await User.findById(userId);
-        const targetUser = await User.findById(targetUserId);
-        user.following_count -= 1;
-        targetUser.followers_count -= 1;
+        const user = await UserModel.findById(userId);
+        const targetUser = await UserModel.findById(targetUserId);
+        user.followingCount -= 1;
+        targetUser.followersCount -= 1;
         await user.save();
         await targetUser.save();
         res.status(200).json({ message: 'Вы отписались от пользователя' });

@@ -1,14 +1,20 @@
 "use client";
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from "../utils/AuthContext";
 
 export default function HomePage() {
   const router = useRouter();
+  const { token } = useAuth();
 
   useEffect(() => {
-    // Перенаправляем на /login при монтировании компонента
-    router.push("/login");
-  }, [router]);
+    if (!token) {
+      router.push("/login"); // Перенаправляем на страницу логина, если пользователь не авторизован
+    }
+  }, [token, router]);
+  if (!token) {
+    return null; // Показываем пустую страницу или индикатор загрузки до перенаправления
+  }
 
   return (
     <div className="p-4 max-w-screen-lg mx-auto">

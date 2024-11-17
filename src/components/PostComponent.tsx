@@ -11,20 +11,20 @@ const PostComponent: React.FC<PostProps> = ({ post }) => {
   return (
     <>
       <div>
-        <h3>{post.user_name}</h3>
+        <h3>{post.userName}</h3>
         <p>{post.caption}</p>
         <div>
-          <span>Likes: {post.likes_count}</span>
-          <span>Comments: {post.comments_count}</span>
+          <span>Likes: {post.likesCount}</span>
+          <span>Comments: {post.commentsCount}</span>
         </div>
       </div>
       <Image src=
-        {post.image_url} alt=
+        {post.imageUrl} alt=
         {post.caption}
       />
-      {post.profile_image &&
+      {post.avatar &&
         <Image src=
-          {post.profile_image} alt=
+          {post.avatar} alt=
           "Profile" />}
     </>
   );

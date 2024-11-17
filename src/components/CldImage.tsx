@@ -1,7 +1,7 @@
 import React from 'react';
 import { CldImage } from 'next-cloudinary';
 
-interface CldImageComponentProps {
+interface CldImageComponent {
   src: string;
   alt?: string;
   width?: number;
@@ -13,7 +13,7 @@ export default function CldImageComponent({
   alt = "Image",
   width = 500,
   height = 500,
-}: CldImageComponentProps) {
+}: CldImageComponent) {
   if (!src) return null;
 
   return (

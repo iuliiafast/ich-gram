@@ -5,16 +5,16 @@ import Footer from '../../components/Footer';
 import Image from 'next/image';
 
 const imageUrls = [
-  'https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample1.jpg',
-  'https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample2.jpg',
-  'https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample3.jpg',
-  'https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample4.jpg',
-  'https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample5.jpg',
-  'https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample6.jpg',
-  'https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample7.jpg',
-  'https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample8.jpg',
-  'https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample9.jpg',
-  'https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample10.jpg',
+  `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample1.jpg`,
+  `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample2.jpg`,
+  `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample3.jpg`,
+  `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample4.jpg`,
+  `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample5.jpg`,
+  `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample6.jpg`,
+  `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample7.jpg`,
+  `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample8.jpg`,
+  `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample9.jpg`,
+  `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample10.jpg`,
 ];
 
 const ExplorePage = () => {

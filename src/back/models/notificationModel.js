@@ -1,9 +1,12 @@
 import mongoose from 'mongoose';
+
 const notificationSchema = new mongoose.Schema({
-    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    notification_text: { type: String, required: true },
-    is_read: { type: Boolean, default: false },
-    created_at: { type: Date, default: Date.now }
-});
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'UserModel', required: true },
+    type: { type: String, enum: ['like', 'comment', 'follow'], required: true },
+    message: { type: String, required: true },
+    sourceId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    read: { type: Boolean, default: false },
+}, { timestamps: true });
+
 const Notification = mongoose.model('Notification', notificationSchema);
 export default Notification;

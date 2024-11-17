@@ -1,9 +1,9 @@
 import express from 'express';
-import { getUserNotifications, createNotification, deleteNotification, updateNotificationStatus } from '../controllers/notificationController.js';
+import { getNotifications, createNotification, deleteNotification, updateNotificationStatus } from '../controllers/notificationController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 const router = express.Router();
 // Получение всех уведомлений пользователя
-router.get('/:userId/notifications', authMiddleware, getUserNotifications);
+router.get('/:userId/notifications', authMiddleware, getNotifications);
 // Создание нового уведомления
 router.post('/notifications', authMiddleware, createNotification);
 // Удаление уведомления

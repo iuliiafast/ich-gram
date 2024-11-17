@@ -1,9 +1,9 @@
 import express from 'express';
-import { getUserProfile, updateUserProfile, uploadProfileImage } from '../controllers/userController.js';
+import { getProfile, updateProfile, uploadAvatar } from '../controllers/userController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 const router = express.Router();
 // Получение профиля пользователя
-router.get('/profile/:userId', authMiddleware, getUserProfile);
+router.get('/profile/:userId', authMiddleware, getProfile);
 // Обновление профиля пользователя с загрузкой изображения
-router.put('/current', authMiddleware, uploadProfileImage, updateUserProfile);
+router.put('/current', authMiddleware, uploadAvatar, updateProfile);
 export default router;

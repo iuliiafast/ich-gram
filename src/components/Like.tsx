@@ -1,18 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
-interface Like {
-  _id: string;
-  post_id: string;
-  user_id: string;
-  created_at: string;
-}
-
-interface Post {
-  _id: string;
-  likes_count: number;
-}
+import { Like, Post } from "../utils/types";
 
 const Like = () => {
   const [likes, setLikes] = useState<Like[]>([]);
@@ -31,7 +20,7 @@ const Like = () => {
     try {
       const response = await axios.get(`/api/likes/${postId}`);
       setLikes(response.data);
-      setIsLiked(response.data.some((like: Like) => like.user_id === userId));
+      setIsLiked(response.data.some((like: Like) => like.userId === userId));
     } catch (error) {
       console.error('Error fetching likes:', error);
     }
@@ -70,7 +59,7 @@ const Like = () => {
     <div>
       <h1>Post Likes</h1>
       <p>Post ID: {postId}</p>
-      <p>Total Likes: {post?.likes_count || 0}</p>
+      <p>Total Likes: {post?.likesCount || 0}</p>
 
       <button onClick={isLiked ? unlikePost : likePost}>
         {isLiked ? 'Unlike' : 'Like'}
@@ -79,8 +68,8 @@ const Like = () => {
       <h2>All Likes</h2>
       <ul>
         {likes.map((like) => (
-          <li key={like._id}>
-            User ID: {like.user_id}, Liked at: {new Date(like.created_at).toLocaleString()}
+          <li key={like.userId}>
+            User ID: {like.userId}, Liked at: {new Date(like.createdAt).toLocaleString()}
           </li>
         ))}
       </ul>

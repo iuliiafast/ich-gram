@@ -1,34 +1,22 @@
-import getUserIdFromToken from '../utils/helpers.js';
+import getIdFromToken from '../utils/helpers.js';
 import stream from 'stream';
 import upload from '../middlewares/multer.js';
 import cloudinary from '../config/cloudinaryConfig.js';
 import mongoose from 'mongoose';
-import UserModel from '../models/userModel.js';
+import User from '../models/userModel.js';
 
 // Получение профиля пользователя
-export const getUserProfile = async (req, res) => {
+export const getProfile = async (req, res) => {
     try {
-        const userId = req.params.userId; // Получаем userId из параметров URL
+        const userId = req.params.userId;
 
-        // Ищем пользователя по userId
-        const user = await UserModel.findById(userId);
-        if (!user) {
-            // Если пользователь не найден, отправляем ошибку 404
+        // Используем стандартный метод findOne для поиска пользователя по userId
+        const profile = await User.findOne({ _id: userId });
+
+        if (!profile) {
             return res.status(404).json({ message: 'Пользователь не найден' });
         }
-
-        const userProfile = {
-            user_id: user._id,
-            username: user.username,
-            full_name: user.full_name,
-            posts_count: user.posts_count || 0,
-            followers_count: user.followers_count || 0,
-            following_count: user.following_count || 0,
-            avatar: user.avatar || 'default-avatar.jpg',
-            bio: user.bio || ''
-        };
-
-        res.status(200).json(userProfile);  // Отправляем данные профиля в ответ
+        res.status(200).json(profile);
     } catch (error) {
         console.error('Ошибка при получении профиля:', error);
         return res.status(500).json({ message: 'Ошибка сервера.' });
@@ -36,64 +24,69 @@ export const getUserProfile = async (req, res) => {
 };
 
 // Обновление профиля пользователя
-export const updateUserProfile = async (req, res) => {
-    const token = req.headers.authorization?.split(' ')[1]; // Получаем токен из заголовков
-
+export const updateProfile = async (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
         return res.status(401).json({ message: 'Токен не предоставлен' });
     }
 
     try {
-        const userId = getUserIdFromToken(token); // Получаем userId из токена
+        // Получаем userId из токена
+        const userId = getIdFromToken(token);
 
         if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).json({ message: 'Некорректный формат ID пользователя' });
         }
 
-        const user = await UserModel.findById(userId);
-        if (!user) {
+        // Ищем пользователя по ID
+        const profile = await User.findById(userId); // Используем метод findById для поиска по userId
+        if (!profile) {
             return res.status(404).json({ message: 'Пользователь не найден' });
         }
 
-        const { username, bio } = req.body;
+        const { userName, bio } = req.body;
+        if (userName) profile.userName = userName; // Обновляем userName, если он передан
+        if (bio) profile.bio = bio; // Обновляем bio, если оно передано
 
-        // Обновляем поля пользователя, если они переданы
-        if (username) user.username = username;
-        if (bio) user.bio = bio;
-
-        // Если файл был загружен, обрабатываем изображение
+        // Загрузка аватара, если файл был передан
         if (req.file) {
-            const uploadImage = () => new Promise((resolve, reject) => {
+            const uploadAvatar = async () => {
                 const bufferStream = new stream.PassThrough();
                 bufferStream.end(req.file.buffer);
 
-                const uploadStream = cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
-                    if (error) {
-                        console.error('Ошибка при загрузке изображения на Cloudinary:', error);
-                        reject(error);
-                    } else {
-                        resolve(result?.secure_url || ''); // Возвращаем ссылку на изображение
-                    }
+                return new Promise((resolve, reject) => {
+                    const uploadStream = cloudinary.uploader.upload_stream(
+                        { resource_type: 'image' },
+                        (error, result) => {
+                            if (error) {
+                                console.error('Ошибка при загрузке изображения на Cloudinary:', error);
+                                reject(error);
+                            } else {
+                                resolve(result?.secure_url || ''); // Возвращаем URL загруженного изображения
+                            }
+                        }
+                    );
+                    bufferStream.pipe(uploadStream); // Подаём данные изображения в Cloudinary
                 });
-                bufferStream.pipe(uploadStream);
-            });
+            };
 
             try {
-                user.profile_image = await uploadImage(); // Обновляем ссылку на изображение
+                const avatarUrl = await uploadAvatar(); // Получаем URL аватара
+                profile.avatar = avatarUrl; // Обновляем аватар пользователя
             } catch (error) {
                 return res.status(500).json({ message: 'Ошибка загрузки изображения', error });
             }
         }
 
-        // Сохраняем обновленные данные пользователя
-        const updatedUser = await user.save();
+        // Сохраняем обновлённый профиль в базе данных
+        const updatedProfile = await profile.save();
 
-        res.status(200).json({ message: 'Профиль успешно обновлен', user: updatedUser });
+        res.status(200).json({ message: 'Профиль успешно обновлен', profile: updatedProfile });
     } catch (error) {
         console.error('Ошибка при обновлении профиля:', error);
         res.status(500).json({ message: 'Ошибка обновления профиля', error });
     }
 };
 
-// Загружка изображения профиля
-export const uploadProfileImage = upload.single('profile_image');
+// Middleware для загрузки аватара с использованием multer
+export const uploadAvatar = upload.single('avatar'); // Загружаем аватар с помощью multer

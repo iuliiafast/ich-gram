@@ -1,13 +1,17 @@
 import mongoose from 'mongoose';
+
 const postSchema = new mongoose.Schema({
-    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    profile_image: { type: String, require: true },
-    image_url: { type: String, required: true },
-    user_name: { type: String, required: true },
-    caption: { type: String, default: '' },
-    likes_count: { type: Number, default: 0 },
-    comments_count: { type: Number, default: 0 },
-    created_at: { type: Date, default: Date.now }
-});
+    puserId: { type: mongoose.Schema.Types.ObjectId, ref: 'UserModel', required: true },
+    avatar: { type: String, default: '' }, // Аватар пользователя
+    userName: { type: String, required: true }, // Имя пользователя
+    imageUrl: { type: String, required: true }, // URL изображения
+    caption: { type: String, default: '' }, // Подпись к посту
+    likesCount: { type: Number, default: 0 }, // Количество лайков
+    commentsCount: { type: Number, default: 0 }, // Количество комментариев
+}, { timestamps: true });
+
+postSchema.index({ profileId: 1 });
+
+
 const Post = mongoose.model('Post', postSchema);
 export default Post;

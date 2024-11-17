@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const getUserIdFromToken = (token) => {
+const getIdFromToken = (token) => {
     const secret = process.env.JWT_SECRET;
     if (!secret) {
         throw new Error('JWT_SECRET не задан в переменных окружения.');
@@ -24,4 +24,4 @@ const getUserIdFromToken = (token) => {
         throw new Error('Невалидный токен');
     }
 };
-export default getUserIdFromToken;
+export default getIdFromToken;

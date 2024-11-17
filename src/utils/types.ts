@@ -1,109 +1,160 @@
-import { Types, Document } from 'mongoose';
-import { Request, Response } from 'express';
+import mongoose, { Types, Document } from 'mongoose';
+import { Request } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
-import User from '../back/models/userModel';
-// Интерфейс для профиля пользователя
-export interface UserProfile {
-  _id: string;
-  full_name: string;
-  username: string;
-  avatar: string;
-  followers_count: number;
-  following_count: number;
-  posts_count: number;
-  bio: string;
-};
+import { ThunkAction } from "redux-thunk";
+import { RootState } from "../utils/store/index";
 
-// Интерфейс для ответа профиля
-export interface UserProfileResponse {
-  user_id: string;
-  username: string;
-  full_name: string;
-  posts_count: number;
-  followers_count: number;
-  following_count: number;
+// Определяем тип для асинхронного действия
+export type AppDispatch = ThunkDispatch<RootState, unknown, any>;
+export type AsyncThunkAction = ThunkAction<Promise<void>, RootState, unknown, Action<string>>;
+
+export interface UserObject {
+  email: string;
+  fullName: string;
+  userName: string;
+  password: string;
+}
+
+export interface User {
+  UserId: string;
+  userName: string;
+}
+
+export interface Profile extends Document {
+  userId: mongoose.Types.ObjectId;
+  userName: string;
   avatar: string;
+  postsCount: number;
+  followersCount: number;
+  followingCount: number;
   bio: string;
-};
+  website?: string;
+}
+
+// Интерфейс для API-ответа профиля
+export interface profileResponse {
+  userId: string; // Изменено для согласованности
+  userName: string;
+  fullName: string;
+  avatar: string;
+  postsCount: number;
+  followersCount: number;
+  followingCount: number;
+  bio: string;
+}
 
 // Интерфейс для запроса с пользователем
 export interface RequestWithUser extends Request {
   user?: {
     _id: string;
-    username: string;
-    full_name: string;
-    posts_count: number;
-    followers_count: number;
-    following_count: number;
+    userName: string;
+    fullName: string;
     avatar: string;
+    postsCount: number;
+    followersCount: number;
+    followingCount: number;
     bio: string;
-  };
-};
+  }
+}
 
 // Интерфейс для поста
 export interface Post {
-  user_id: Types.ObjectId;
-  image_url: string;
-  user_name: string;
+  userId: Types.ObjectId;
+  imageUrl: string;
+  userName: string;
   caption: string;
-  likes_count: number;
-  comments_count: number;
-  created_at: Date;
-  profile_image?: string;
-};
+  likesCount: number;
+  commentsCount: number;
+  createdAt: Date;
+  profileImage?: string;
+  PostId: string;
+}
+// Интерфейс для компонентов с лентой постов
 export interface PostFeedProps {
   posts: Post[];
-};
-// Интерфейс для ошибки
+}
+// Интерфейс для обработки ошибок
 export interface ErrorResponse {
-  error: string;  // Ошибка в случае неудачного запроса
-};
-
-// Интерфейс для успешного ответа (список постов)
+  error: string;
+}
+// Интерфейс для успешного ответа
 export interface SuccessResponse {
-  success: boolean; // Успешный ответ
-  posts?: Post[];   // Массив постов в случае успешного запроса
-  post?: Post;      // Один пост, если запрос касается одного поста
-  message?: string; // Сообщение (по желанию)
+  success: boolean;
+  posts?: Post[];
+  post?: Post;
+  message?: string;
+}
+
+/// Интерфейс для токена
+export interface DecodedToken extends JwtPayload {
+  userId: string; // Изменено для согласованности
+}
+
+// Интерфейс для запросов с токеном
+export interface RequestWithToken extends Request {
+  token?: string;
+}
+
+// Интерфейс для формы профиля
+export interface ProfileFormProps extends Request {
+  profile: Profile;
+  userId: string;
+}
+
+export type AvatarUploadProps {
+  userId: string;
+  token: string;
+  onAvatarChange?: (avatarUrl: string) => void;
 };
 
-// Интерфейс для запроса с файлом
-export interface RequestWithFile extends Request {
-  file: Express.Multer.File;  // Добавляем свойство `file` для работы с загрузкой файлов
+export interface FollowPage {
+  userId: string;
+}
+
+export interface MenuItem {
+  name: string;
+  path: string;
+  iconSrc: string;
+}
+
+export interface Like {
+  LikeId: string;
+  postId: string;
+  userId: string;
+  createdAt: string;
+}
+
+export interface PostFeed {
+  userId: string;
+}
+export type LoginFormProps = {
+  setError: React.Dispatch<React.SetStateAction<string | null>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoading: boolean;
 };
 
-// Интерфейс для обновления профиля пользователя
-export interface UpdateUserProfileBody {
+export interface ProfileUpdates {
   username?: string;
   bio?: string;
-  profile_image?: Express.Multer.File;  // Если потребуется обновить изображение профиля, можно добавить сюда
-};
-// Типизация декодированного объекта
-export interface DecodedToken extends JwtPayload {
-  user_id: string;  // user_id должен быть строкой
-};
-export interface CustomRequest extends Request {
-  user?: User; // Здесь укажите тип User, который вы используете
-};
-export interface User extends Document {
-  _id: string; // или Types.ObjectId
-  username: string;
-  profile_image?: string | null;
-  email: string;
-  password: string;
-  full_name: string;
-  bio: string;
-  followers_count: number;
-  following_count: number;
-  posts_count: number;
-  avatar: string;
-  created_at: Date;
-};
-export interface RequestWithToken extends Request {
-  token?: string;  // Токен может быть в заголовке или в теле запроса
-};
+  avatar?: string;
+}
+export interface CloudinaryUploadResult {
+  secure_url: string;  // URL загруженного изображения
+  public_id: string;   // Публичный ID изображения в Cloudinary
+  url: string;         // Общий URL изображения
+  width: number;       // Ширина изображения
+  height: number;      // Высота изображения
+}
 
-export interface ProfileFormProps extends Request {
-  userProfile: UserProfile;
-  userId: string;
-};
+// Интерфейс для обновлений профиля пользователя
+export interface ProfileUpdates {
+  userName?: string;
+  bio?: string;
+  avatar?: string; // URL изображения в Cloudinary
+}
+export interface AuthState {
+  user: UserObject | null;
+  token: string | null;
+  errorMessage: string | null;
+  isLoading: boolean;
+}

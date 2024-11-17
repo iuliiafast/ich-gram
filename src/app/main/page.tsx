@@ -1,79 +1,60 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import Sidebar from '../../components/Sidebar';
-import PostFeed from '../../components/PostFeed';
-import Footer from '../../components/Footer';
-import AvatarUpload from '../../components/AvatarUpload';
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import { useRouter } from 'next/router';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import Sidebar from "../../components/Sidebar";
+import Footer from "../../components/Footer";
+import Image from 'next/image';
+import ProfileButton from '../../components/ProfileButton';
 
-const Main = () => {
-  const [socket, setSocket] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const router = useRouter();
+const MainPage = () => {
 
-  const handleLogin = async () => {
-    setIsLoading(true); // Устанавливаем состояние загрузки
-
-    try {
-      const response = await axios.post(
-        "/api/auth/login",
-        {
-          [isEmail ? "email" : "username"]: login, // Выбор email или username
-          password,
-        },
-        { withCredentials: true }
-      );
-
-      if (response.data.token) {
-        Cookies.set("token", response.data.token, { expires: 7 }); // Сохраняем токен в куки
-
-        const socketConnection = initializeWebSocket(response.data.token);
-        setSocket(socketConnection);
-
-        router.push("/profile"); // Переход на страницу профиля
-      }
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.message || "Ошибка авторизации. Проверьте правильность данных.");
-      } else {
-        setError("Произошла ошибка. Попробуйте позже.");
-      }
-    } finally {
-      setIsLoading(false); // Отключаем состояние загрузки
-    }
-  };
+  const [userId, setUserId] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    return () => {
-      if (socket) {
-        socket.disconnect();
-        console.log("WebSocket: Connection closed.");
-      }
-    };
-  }, [socket]);
+    setUserId("some-valid-user-id");
+    setToken("some-valid-token");
+  }, []);
+
+  if (!userId || !token) {
+    return <div>Loading...</div>;
+
+  }
+  const imageUrls = [
+    `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample1.jpg`,
+    `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample2.jpg`,
+    `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample3.jpg`,
+    `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample4.jpg`
+  ];
 
   return (
     <>
-      <div className="flex h-screen bg-gray-100">
-        <div className="flex h-screen">
-          <Sidebar />
-          <button
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onClick={handleLogin}
-          >
-            <AvatarUpload />
-            <span>Profile</span>
-          </button>
+      <div className="">
+        <Sidebar />
+        <div>
+          <ProfileButton userId={userId} token={token} />
         </div>
-        <div className="flex-grow p-6"> {/* Добавим класс для отступов */}</div>
-        <PostFeed />
+
+        <div className="grid grid-cols-2 grid-rows-2 gap-4 mt-4">
+          {/* Вторая колонка с четырьмя изображениями */}
+          {imageUrls.map((url, index) => (
+            <div key={index} className="bg-green-400 h-full">
+              <Image
+                src={url}
+                alt={`Random Image ${index + 1}`}
+                width={317}
+                height={317}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
+        </div>
       </div>
+
       <Footer />
     </>
   );
 };
 
-export default Main;
+export default MainPage;

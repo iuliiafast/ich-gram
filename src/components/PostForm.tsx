@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { ImageForm } from "./ImageForm";  // Предполагаю, что у вас есть компонент ImageForm
+import { ImageForm } from "./ImageForm";
 
 const PostForm: React.FC = () => {
   const [content, setContent] = useState<string>("");

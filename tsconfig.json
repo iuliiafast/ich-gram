@@ -2,6 +2,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@redux/*": [
+        "src/redux/*"
+      ],
       "@utils/*": [
         "src/app/utils/*"
       ],
@@ -12,6 +15,8 @@
         "src/app/styles/*"
       ]
     },
+    "outDir": "./dist",
+    "moduleResolution": "node",
     "target": "ES2017",
     "lib": [
       "dom",
@@ -19,12 +24,14 @@
       "esnext"
     ],
     "allowJs": true,
+    "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
     "strict": true,
     "noEmit": false,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -41,7 +48,7 @@
   },
   "include": [
     "next-env.d.ts",
-    ".next/types/**/*.ts",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

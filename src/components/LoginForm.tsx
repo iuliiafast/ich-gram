@@ -4,56 +4,61 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { io, Socket } from "socket.io-client";
+import { useDispatch, useSelector } from "react-redux";
+import { registerStart, registerSuccess, registerFailure, clearError } from "../utils/store/slices/authSlice";
+import { LoginFormProps } from "../utils/types";
+import { RootState } from "../utils/store/index";
 
-type LoginFormProps = {
-  setError: React.Dispatch<React.SetStateAction<string | null>>;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  isLoading: boolean;
-};
-
-const LoginForm = ({ setError, setIsLoading, isLoading }: LoginFormProps) => {
+const LoginForm = ({ setIsLoading, isLoading }: LoginFormProps) => {
   const [userObject, setUserObject] = useState<{ login: string; password: string }>({
     login: "",
     password: "",
   });
   const [socket, setSocket] = useState<Socket | null>(null);
+  const dispatch = useDispatch();
   const router = useRouter();
 
+  const { errorMessage, isLoading: reduxIsLoading } = useSelector((state: RootState) => state.auth);
+
   const initializeWebSocket = (token: string) => {
-    const socketConnection = io("http://localhost:3000", {
-      extraHeaders: {
-        Authorization: `Bearer ${token}`,
+    const socket = io("/", {
+      auth: {
+        token: `Bearer ${token}`,
       },
     });
 
-    socketConnection.on("connect", () => {
+    socket.on("connect", () => {
       console.log("WebSocket: Connection successfully established!");
     });
 
-    socketConnection.on("message", (data) => {
+    socket.on("message", (data) => {
       console.log("WebSocket message:", data);
     });
 
-    socketConnection.on("connect_error", (err) => {
+    socket.on("connect_error", (err) => {
       console.log("WebSocket connection error:", err.message);
     });
 
-    return socketConnection;
+    return socket;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null); // Сброс ошибки при отправке формы
+    dispatch(registerStart()); // Начало регистрации
 
     const { login, password } = userObject;
     const isEmail = login.includes("@");
+
+    if (!login || !password) {
+      dispatch(registerFailure("Введите email/username и пароль."));
+      return;
+    }
 
     try {
       const response = await axios.post(
         "/api/auth/login",
         {
-          [isEmail ? "email" : "username"]: login,
+          [isEmail ? "email" : "userName"]: login,
           password,
         },
         { withCredentials: true }
@@ -62,56 +67,80 @@ const LoginForm = ({ setError, setIsLoading, isLoading }: LoginFormProps) => {
       if (response.data.token) {
         Cookies.set("token", response.data.token, { expires: 7 });
 
+        // Диспатчим успех регистрации с полученными данными
+        dispatch(registerSuccess({ user: response.data.user, token: response.data.token }));
+
         const socketConnection = initializeWebSocket(response.data.token);
         setSocket(socketConnection);
 
-        router.push("/profile");
+        router.push(`/profile/${response.data.user._id}`);
       }
     } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.message || "Ошибка авторизации. Проверьте правильность данных.");
+      if (err instanceof Error) {
+        const message = err.message || "Ошибка авторизации. Проверьте правильность данных.";
+        dispatch(registerFailure(message)); // Ошибка
       } else {
-        setError("Произошла ошибка. Попробуйте позже.");
+        // Если ошибка не является экземпляром Error
+        dispatch(registerFailure("Произошла ошибка при авторизации."));
       }
     } finally {
       setIsLoading(false);
     }
   };
-
+  // Очистка сокета при размонтировании компонента
   useEffect(() => {
     return () => {
-      if (socket) {
-        socket.disconnect();
+      if (socket && socket.connected) {
+        socket.disconnect(); // Закрытие соединения при размонтировании
         console.log("WebSocket: Connection closed.");
       }
     };
-  }, [socket]);
+  }, [socket]); // Слежение за изменением сокета
+  // Функция для очистки ошибки при изменении данных в поле ввода
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setUserObject((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Очистка ошибки при изменении данных
+    dispatch(clearError());
+  };
 
   return (
     <form onSubmit={handleSubmit} className="w-full mt-6 space-y-4">
       <input
-        onChange={(e) => setUserObject({ ...userObject, login: e.target.value })}
+        name="login"
+        value={userObject.login}
+        onChange={handleInputChange}
         type="text"
         placeholder="Имя пользователя или email"
         className="p-2 border rounded w-full"
         required
+        disabled={reduxIsLoading || isLoading}
       />
 
       <input
-        onChange={(e) => setUserObject({ ...userObject, password: e.target.value })}
+        name="password"
+        value={userObject.password}
+        onChange={handleInputChange}
         type="password"
         placeholder="Пароль"
         className="p-2 border rounded w-full"
         required
+        disabled={reduxIsLoading || isLoading}
       />
 
       <button
         type="submit"
         className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-300"
-        disabled={isLoading}
+        disabled={reduxIsLoading || isLoading}
       >
-        {isLoading ? "Загрузка..." : "Log in"}
+        {reduxIsLoading ? "Загрузка..." : "Log in"}
       </button>
+
+      {errorMessage && <div className="text-red-500">{errorMessage}</div>}
     </form>
   );
 };

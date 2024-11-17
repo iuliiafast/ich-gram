@@ -3,8 +3,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Post } from '../utils/types';
 import PostComponent from '../components/PostComponent';
+import { PostFeed } from "../utils/types";
 
-const PostFeed = () => {
+const PostFeed: React.FC<PostFeed> = ({ userId }) => {
   const [posts, setPosts] = useState<Post[]>([]);  // Состояние для постов
   const [loading, setLoading] = useState(false);  // Состояние загрузки
   const [error, setError] = useState<string | null>(null);  // Состояние ошибки
@@ -34,9 +35,27 @@ const PostFeed = () => {
         console.error("Ошибка при загрузке постов:", error);
 
         if (axios.isAxiosError(error)) {
-          console.error("Ошибка Axios:", error.response || error.message);
+          if (error.response) {
+            // Сервер вернул ошибку
+            console.error("Ошибка Axios с ответом:", error.response.data || error.response.status);
+            if (error.response.status === 500) {
+              setError("Ошибка сервера. Попробуйте позже.");
+            } else if (error.response.status === 404) {
+              setError("Посты не найдены.");
+            }
+          } else if (error.request) {
+            // Ошибка при отправке запроса (например, проблемы с сетью)
+            console.error("Ошибка при отправке запроса:", error.request);
+            setError("Ошибка сети. Проверьте подключение к интернету.");
+          } else {
+            // Ошибка в настройке запроса
+            console.error("Ошибка Axios (неизвестная ошибка):", error.message);
+            setError("Произошла неизвестная ошибка.");
+          }
         } else {
-          console.error("Неизвестная ошибка:", error.message);
+          // Неизвестная ошибка (не связана с Axios)
+          console.error("Неизвестная ошибка:", error);
+          setError("Произошла неизвестная ошибка.");
         }
       } finally {
         setLoading(false);
@@ -54,7 +73,7 @@ const PostFeed = () => {
 
       <ul>
         {posts.map((post) => (  // Правильный синтаксис стрелочной функции
-          <PostComponent key={post.user_id.toString()} post={post} />
+          <PostComponent key={userId} post={post} />
         ))}
       </ul>
     </div>

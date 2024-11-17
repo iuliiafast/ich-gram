@@ -1,78 +1,104 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import User from '../models/userModel.js';
-import generateToken from '../config/jwt.js';
-import Profile from '../models/profileModel.js';
+import { generateToken } from '../config/jwt.js';
 
 export const register = async (req, res) => {
-    const { email, password, full_name, username, bio, avatar } = req.body;
+    const { email, fullName, userName, password } = req.body;
     try {
-        const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+        // Проверка на существующего пользователя с таким email или username
+        const existingUser = await User.findOne({ $or: [{ email }, { userName }] });
         if (existingUser) {
             return res.status(400).json({ message: 'Пользователь с таким email или именем уже существует' });
         }
+
+        // Минимальная длина пароля
+        if (password.length < 6) {
+            return res.status(400).json({ message: 'Пароль слишком короткий. Минимум 6 символов.' });
+        }
+
+        // Хеширование пароля
         const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Создание нового пользователя
         const user = new User({
-            username,
             email,
+            fullName,
+            userName,
             password: hashedPassword,
-            full_name
+            avatar: '',
+            postsCount: 0,
+            followersCount: 0,
+            followingCount: 0,
+            bio: '',
+            website: ''
         });
+
         await user.save();
 
-        // Создание профиля для пользователя
-        const profile = new Profile({
-            userId: user._id, // Ссылка на созданного пользователя
-            username,
-            fullname: full_name,
-            bio,
-            avatar
-        });
-        await profile.save();
-
-
+        // Генерация JWT токена
         const token = generateToken(user);
-        res.status(201).json({ token, user, profile, message: 'Регистрация успешна!' });
-    }
-    catch (error) {
+
+        // Установка cookies с токеном и профилем (если нужно)
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 3 * 60 * 60 * 1000, // 3 часа
+            sameSite: 'Strict',
+        });
+
+        const { ...userWithoutPassword } = user.toJSON();
+        res.status(201).json({
+            user: userWithoutPassword,
+            message: 'Регистрация успешна!'
+        });
+    } catch (error) {
         console.error("Ошибка при регистрации:", error);
         res.status(500).json({ message: "Внутренняя ошибка сервера", error: error.message });
     }
 };
+
 export const login = async (req, res) => {
-    const { email, username, password } = req.body;
+    const { email, userName, password } = req.body;
 
     try {
-        // Если в запросе не указаны ни email, ни username
-        if (!email && !username) {
+        // Если email или userName не указан, возвращаем ошибку
+        if (!email && !userName) {
             return res.status(400).json({ message: 'Укажите email или username.' });
         }
 
-        // Поиск пользователя по email или username
         let user;
         if (email) {
             user = await User.findOne({ email });
-        } else if (username) {
-            user = await User.findOne({ username });
+        } else if (userName) {
+            user = await User.findOne({ userName });
         }
 
-        // Если пользователь не найден
         if (!user) {
-            return res.status(400).json({ message: 'Неверный email/username или пароль.' });
+            return res.status(400).json({ message: 'Неверный email/userName или пароль.' });
         }
 
         // Проверка пароля
         const isMatch = await bcrypt.compare(password, user.password);
+
         if (!isMatch) {
-            return res.status(400).json({ message: 'Неверный email/username или пароль.' });
+            return res.status(400).json({ message: 'Неверный email/userName или пароль.' });
         }
 
-        // Генерация токена
-        const token = generateToken({ id: user._id });
+        // Генерация JWT токена
+        const token = generateToken(user);
 
-        // Убираем пароль из данных пользователя перед отправкой
-        const { password, ...userWithoutPassword } = user._doc;
-        res.status(200).json({ token, user: userWithoutPassword });
+        // Установка cookies с токеном
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 3 * 60 * 60 * 1000, // 3 часа
+            sameSite: 'Strict',
+        });
 
+        // Удаляем пароль перед отправкой данных на клиент
+        const { ...userWithoutPassword } = user.toJSON();
+
+        res.status(200).json({ user: userWithoutPassword });
     } catch (error) {
         console.error("Ошибка при логине:", error);
         res.status(500).json({ message: 'Ошибка авторизации', error: error.message });

@@ -1,19 +1,18 @@
-// Получение профиля пользователя
 export const getUserProfile = async (req, res) => {
     try {
-        const user = req.user; // Получаем пользователя из объекта запроса
+        const user = req.user;
         if (!user) {
             return res.status(404).json({ message: 'Пользователь не найден.' });
         }
-        // Формируем данные профиля
         const userProfile = {
-            user_id: user._id,
-            username: user.username,
-            full_name: user.full_name,
-            posts_count: user.posts_count,
-            followers_count: user.followers_count,
-            following_count: user.following_count,
-            avatar: user.avatar,
+            userId: user._id,
+            userName: user.userName,
+            avatar: avatar || 'default-avatar.jpg',
+            postsCount: postsCount || 0,
+            followersCount: followersCount || 0,
+            followingCount: followingCount || 0,
+            bio: bio || '',
+            website: website || '',
         };
         res.status(200).json(userProfile); // Отправляем данные профиля в ответ
     }

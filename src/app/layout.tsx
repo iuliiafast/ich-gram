@@ -1,8 +1,13 @@
+"use client";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./styles/globals.css";
 import { ModalProvider } from '../components/ModalContext';
 import Modal from '../components/Modal';
+import { AuthProvider } from "../utils/AuthContext";
+import React from "react";
+import { Provider } from 'react-redux';
+import { store } from "../utils/store";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,21 +31,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        {/* Добавляем ссылку на favicon */}
-        <link rel="icon" href="/favicon.ico" />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {/* Оборачиваем всё в ModalProvider */}
-        <ModalProvider>
-          {children}
-          {/* Вставляем компонент Modal */}
-          <Modal />
-        </ModalProvider>
-      </body>
-    </html>
+    <>
+      <html lang="en">
+        <head>
+          {/* Добавляем ссылку на favicon */}
+          <link rel="icon" href="/favicon.ico" />
+        </head>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <Provider store={store}>
+            {/* Оборачиваем всё в ModalProvider и AuthProvider  */}
+            <AuthProvider>
+              <ModalProvider>
+                {children}
+                {/* Вставляем компонент Modal */}
+                <Modal />
+              </ModalProvider>
+            </AuthProvider>
+          </Provider>
+        </body>
+      </html>
+    </>
   );
 }

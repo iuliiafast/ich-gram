@@ -11,11 +11,13 @@ import followRoutes from './src/back/routes/followRoutes.js';
 import notificationRoutes from './src/back/routes/notificationRoutes.js';
 import { specs, swaggerUi } from './swagger.js';
 import connectDB from './src/back/config/db.js';
-import { messageSocketHandler, authenticateSocket } from './src/back/routes/messageRoutes.js';
+import { messageSocketHandler } from './src/back/routes/messageRoutes.js';
 import next from 'next';
 import upload from './src/back/middlewares/multer.js';
 import http from 'http';
 import { Server } from 'socket.io';
+//import jwt from 'jsonwebtoken';
+import { authenticateSocket } from './src/back/middlewares/authMiddleware.js';
 
 dotenv.config();
 connectDB();
@@ -44,22 +46,26 @@ nextApp.prepare().then(() => {
       origin: "*", // Разрешить запросы с любого домена (можно сузить в продакшн)
       methods: ["GET", "POST"],
       allowedHeaders: ["Authorization"],
-      credentials: true,  // Разрешить отправку cookies
-    }
+      credentials: true, // Разрешить отправку cookies
+    },
   });
 
-  // Middleware для аутентификации Socket.io
-  io.use((socket, next) => {
-    authenticateSocket(socket, next);
-  });
+  // Middleware для аутентификации WebSocket
+  io.use(authenticateSocket);
 
-  // Обработчик подключения Socket.io
+  // Обработчик подключения WebSocket
   io.on('connection', (socket) => {
     console.log('Клиент подключен:', socket.id);
+    console.log('Данные пользователя:', socket.user);
+
     messageSocketHandler(socket, io);
+
+    socket.on('disconnect', () => {
+      console.log('Пользователь отключился');
+    });
   });
 
-  // Маршрут для загрузки файлов
+  // Настройка маршрутов Express
   app.post('/upload', upload.single('image'), async (req, res) => {
     try {
       const imageUrl = req.file.path;
@@ -70,9 +76,7 @@ nextApp.prepare().then(() => {
     }
   });
 
-  // Middleware и маршруты Express
   app.use(express.json());
-
   app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs));
   app.use('/api/auth', authRoutes);
   app.use('/api/user', userRoutes);
@@ -83,7 +87,7 @@ nextApp.prepare().then(() => {
   app.use('/api/follow', followRoutes);
   app.use('/api/notifications', notificationRoutes);
 
-  // Next.js роутинг
+  // Next.js маршруты
   app.all('*', (req, res) => {
     console.log('Обрабатывается запрос Next.js');
     return handle(req, res);
