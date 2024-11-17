@@ -1,4 +1,4 @@
-import Profile from '../models/profileModel.js';
+import User from '../models/userModel.js';
 
 export const getAvatar = async (req, res) => {
   const { userId } = req.params;
@@ -8,7 +8,7 @@ export const getAvatar = async (req, res) => {
 
   try {
     // Ищем пользователя по ID
-    const user = await Profile.findById(req.params.userId);
+    const user = await User.findById(req.params.userId);
 
     // Если пользователь не найден, возвращаем ошибку
     if (!user) {
@@ -32,7 +32,7 @@ export const uploadAvatar = async (req, res) => {
     const avatarUrl = req.file.path;  // Получаем путь к изображению, загруженному multer
 
     // Ищем пользователя по ID
-    const user = await Profile.findById(req.user.id);  // Используем req.user.id, если пользователь аутентифицирован
+    const user = await User.findById(req.user.id);  // Используем req.user.id, если пользователь аутентифицирован
 
     // Если пользователь не найден, возвращаем ошибку
     if (!user) {
@@ -61,7 +61,7 @@ export const updateAvatar = async (req, res) => {
     const avatarUrl = req.file.path;  // Получаем путь к изображению
 
     // Ищем пользователя по ID
-    const user = await Profile.findById(req.user.id);
+    const user = await User.findById(req.user.id);
 
     // Если пользователь не найден, возвращаем ошибку
     if (!user) {

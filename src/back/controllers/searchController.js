@@ -1,10 +1,10 @@
-import UserModel from '../models/userModel.js';
+import User from '../models/userModel.js';
 import Post from '../models/postModel.js';
 
 export const searchUsers = async (req, res) => {
     const { query } = req.query;
     try {
-        const users = await UserModel.find({ userName: { $regex: query, $options: 'i' } }).select('userName bio');
+        const users = await User.find({ userName: { $regex: query, $options: 'i' } }).select('userName bio');
         res.status(200).json(users);
     }
     catch (error) {

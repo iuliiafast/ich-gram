@@ -1,11 +1,13 @@
 import Notification from '../models/notificationModel.js';
-import UserModel from '../models/userModel.js';
+import User from '../models/userModel.js';
 
 export const getNotifications = async (req, res) => {
     try {
-        const notifications = await Notification.find({ profileId: req.params.profileId })
+        const notifications = await Notification.find({ userId: req.params.userId })
             .sort({ createdAt: -1 })
-            .populate('profileId'); // Если нужно подгрузить данные профиля
+            .populate('userId', 'name') // Подставить нужные поля пользователя
+            .populate('sourceId', 'name'); // Подставить данные источника уведомления
+
         res.status(200).json(notifications);
     } catch (error) {
         console.error('Error fetching notifications:', error);
@@ -13,23 +15,23 @@ export const getNotifications = async (req, res) => {
     }
 };
 
+
 export const createNotification = async (req, res) => {
-    const { profileId, type, message, sourceId } = req.body;
+    const { userId, type, message, sourceId } = req.body;
 
     try {
         // Проверка, существует ли профиль
-        const profileExists = await UserModel.findById(profileId);
-        if (!profileExists) {
+        const userExists = await User.findById(userId);
+        if (!userExists) {
             return res.status(404).json({ error: 'Профиль не найден' });
         }
 
         // Создание нового уведомления
         const notification = new Notification({
-            profileId,
+            userId,
             type,
             message,
             sourceId,
-            createdAt: new Date(), // timestamps автоматически добавляются, можно убрать
         });
 
         await notification.save();
@@ -42,14 +44,12 @@ export const createNotification = async (req, res) => {
 
 export const deleteNotification = async (req, res) => {
     try {
-        // Поиск уведомления
         const notification = await Notification.findById(req.params.notificationId);
         if (!notification) {
             return res.status(404).json({ error: 'Уведомление не найдено' });
         }
 
-        // Удаление уведомления
-        await notification.remove();
+        await Notification.deleteOne({ _id: req.params.notificationId }); // Современный способ
         res.status(200).json({ message: 'Уведомление удалено' });
     } catch (error) {
         console.error('Error deleting notification:', error);
@@ -57,16 +57,22 @@ export const deleteNotification = async (req, res) => {
     }
 };
 
+
 export const updateNotificationStatus = async (req, res) => {
+    const { read } = req.body;
+
     try {
-        // Поиск уведомления
         const notification = await Notification.findById(req.params.notificationId);
         if (!notification) {
             return res.status(404).json({ error: 'Уведомление не найдено' });
         }
 
-        // Обновление статуса уведомления
-        notification.read = req.body.read;
+        // Проверка входных данных
+        if (typeof read !== 'boolean') {
+            return res.status(400).json({ error: 'Некорректное значение read' });
+        }
+
+        notification.read = read;
         await notification.save();
         res.status(200).json(notification);
     } catch (error) {

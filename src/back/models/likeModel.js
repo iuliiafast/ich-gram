@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 const likeSchema = new mongoose.Schema({
-    rofileId: { type: mongoose.Schema.Types.ObjectId, ref: 'Profile', required: false },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
     postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post', required: true },
 }, { timestamps: true });
 

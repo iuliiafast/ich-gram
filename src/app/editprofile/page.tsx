@@ -1,48 +1,60 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "React";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import AvatarUpload from "../../components/AvatarUpload";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
 import CldImage from "../../components/CldImage";
+import { RootState } from "../../utils/store/index";
+import {
+  updateProfileStart,
+  updateProfileSuccess,
+  updateProfileFailure,
+} from "../../utils/store/slices/profileSlice";
 
 const ProfileUpdate = ({ userId, token }: { userId: string; token: string }) => {
-  const [userName, setUserName] = useState<string>('');
-  const [bio, setBio] = useState<string>('');
-  const [website, setWebsite] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string>('');  // Держим URL аватара в этом состоянии
+  const [userName, setUserName] = useState<string>("");
+  const [bio, setBio] = useState<string>("");
+  const [website, setWebsite] = useState<string>("");
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
+
+  const dispatch = useDispatch();
+  const { profile, isLoading, errorMessage, successMessage } = useSelector(
+    (state: RootState) => state.profile
+  );
+
+  useEffect(() => {
+    if (profile) {
+      setUserName(profile.userName || "");
+      setBio(profile.bio || "");
+      setWebsite(profile.website || "");
+      setAvatarUrl(profile.avatar || "");
+    }
+  }, [profile]);
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setErrorMessage("");
-    setSuccessMessage("");
+    dispatch(updateProfileStart());
 
     try {
       const response = await axios.put(
         `/api/user/current`,
-        { userName, bio, website, avatar: avatarUrl },  // Отправляем URL аватара
+        { userName, bio, website, avatar: avatarUrl },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       if (response.status === 200) {
-        setSuccessMessage("Профиль успешно обновлен!");
+        dispatch(updateProfileSuccess(response.data));
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setErrorMessage(
-          error.response?.data?.message || "Произошла ошибка при запросе"
-        );
+        dispatch(updateProfileFailure(error.response?.data?.message || "Произошла ошибка при запросе"));
       } else {
-        setErrorMessage("Неизвестная ошибка");
+        dispatch(updateProfileFailure("Неизвестная ошибка"));
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -56,12 +68,12 @@ const ProfileUpdate = ({ userId, token }: { userId: string; token: string }) => 
           <p style={{ color: "red" }}>{errorMessage}</p>
         ) : (
           <>
-            <h1 className="text-2xl font-bold mb-4">{userId?.userName}</h1>
+            <h1 className="text-2xl font-bold mb-4">{userId}</h1>
             <div className="shadow-lg p-4 mb-4">
               <div className="flex items-center mb-4">
                 <div>
                   <CldImage
-                    src={avatarUrl || "/default-avatar.png"}  // Используйте avatarUrl или default аватар
+                    src={avatarUrl || "/default-avatar.png"}
                     width={168}
                     height={168}
                     alt="Avatar"
@@ -71,7 +83,11 @@ const ProfileUpdate = ({ userId, token }: { userId: string; token: string }) => 
                   />
                 </div>
                 <div className="ml-4">
-                  <AvatarUpload userId={userId} token={token} onAvatarChange={setAvatarUrl} />
+                  <AvatarUpload
+                    userId={userId}
+                    token={token}
+                    onAvatarChange={setAvatarUrl}
+                  />
                 </div>
               </div>
             </div>

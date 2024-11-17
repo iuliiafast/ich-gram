@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema({
-    puserId: { type: mongoose.Schema.Types.ObjectId, ref: 'UserModel', required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     avatar: { type: String, default: '' }, // Аватар пользователя
     userName: { type: String, required: true }, // Имя пользователя
     imageUrl: { type: String, required: true }, // URL изображения

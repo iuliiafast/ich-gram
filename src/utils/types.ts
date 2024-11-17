@@ -1,27 +1,11 @@
-import mongoose, { Types, Document } from 'mongoose';
 import { Request } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
-import { ThunkAction } from "redux-thunk";
-import { RootState } from "../utils/store/index";
+import { Types } from 'mongoose';
+import React from 'React';
 
-// Определяем тип для асинхронного действия
-export type AppDispatch = ThunkDispatch<RootState, unknown, any>;
-export type AsyncThunkAction = ThunkAction<Promise<void>, RootState, unknown, Action<string>>;
-
-export interface UserObject {
-  email: string;
-  fullName: string;
-  userName: string;
-  password: string;
-}
-
+// Интерфейс пользователя
 export interface User {
-  UserId: string;
-  userName: string;
-}
-
-export interface Profile extends Document {
-  userId: mongoose.Types.ObjectId;
+  userId: string;
   userName: string;
   avatar: string;
   postsCount: number;
@@ -32,8 +16,8 @@ export interface Profile extends Document {
 }
 
 // Интерфейс для API-ответа профиля
-export interface profileResponse {
-  userId: string; // Изменено для согласованности
+export interface ProfileResponse {
+  userId: string;
   userName: string;
   fullName: string;
   avatar: string;
@@ -54,12 +38,12 @@ export interface RequestWithUser extends Request {
     followersCount: number;
     followingCount: number;
     bio: string;
-  }
+  };
 }
 
 // Интерфейс для поста
 export interface Post {
-  userId: Types.ObjectId;
+  userId: Types.ObjectId; // MongoDB ObjectId
   imageUrl: string;
   userName: string;
   caption: string;
@@ -67,16 +51,19 @@ export interface Post {
   commentsCount: number;
   createdAt: Date;
   profileImage?: string;
-  PostId: string;
+  postId: string;
 }
-// Интерфейс для компонентов с лентой постов
+
+// Интерфейс для ленты постов
 export interface PostFeedProps {
   posts: Post[];
 }
+
 // Интерфейс для обработки ошибок
 export interface ErrorResponse {
   error: string;
 }
+
 // Интерфейс для успешного ответа
 export interface SuccessResponse {
   success: boolean;
@@ -85,9 +72,9 @@ export interface SuccessResponse {
   message?: string;
 }
 
-/// Интерфейс для токена
+// Интерфейс для токена
 export interface DecodedToken extends JwtPayload {
-  userId: string; // Изменено для согласованности
+  userId: string;
 }
 
 // Интерфейс для запросов с токеном
@@ -95,66 +82,49 @@ export interface RequestWithToken extends Request {
   token?: string;
 }
 
-// Интерфейс для формы профиля
-export interface ProfileFormProps extends Request {
-  profile: Profile;
-  userId: string;
-}
-
-export type AvatarUploadProps {
+// Интерфейс для загрузки аватара
+export type AvatarUploadProps = {
   userId: string;
   token: string;
   onAvatarChange?: (avatarUrl: string) => void;
 };
 
-export interface FollowPage {
-  userId: string;
-}
-
-export interface MenuItem {
-  name: string;
-  path: string;
-  iconSrc: string;
-}
-
-export interface Like {
-  LikeId: string;
-  postId: string;
-  userId: string;
-  createdAt: string;
-}
-
-export interface PostFeed {
-  userId: string;
-}
-export type LoginFormProps = {
-  setError: React.Dispatch<React.SetStateAction<string | null>>;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  isLoading: boolean;
-};
-
+// Интерфейс для обновления профиля
 export interface ProfileUpdates {
-  username?: string;
+  userName?: string;
   bio?: string;
-  avatar?: string;
+  avatar?: string; // URL изображения в Cloudinary
 }
+
+// Интерфейс результата загрузки Cloudinary
 export interface CloudinaryUploadResult {
   secure_url: string;  // URL загруженного изображения
   public_id: string;   // Публичный ID изображения в Cloudinary
   url: string;         // Общий URL изображения
   width: number;       // Ширина изображения
   height: number;      // Высота изображения
+  format?: string;     // Формат изображения (например, 'jpg', 'png')
 }
 
-// Интерфейс для обновлений профиля пользователя
-export interface ProfileUpdates {
-  userName?: string;
-  bio?: string;
-  avatar?: string; // URL изображения в Cloudinary
-}
+// Интерфейс состояния авторизации
 export interface AuthState {
-  user: UserObject | null;
-  token: string | null;
-  errorMessage: string | null;
-  isLoading: boolean;
+  user: User | null;   // Данные пользователя
+  token: string | null; // Токен авторизации
+  errorMessage: string | null; // Ошибка авторизации
+  isLoading: boolean;  // Флаг загрузки
 }
+
+// Интерфейс для формы входа
+export type LoginFormProps = {
+  setError: React.Dispatch<React.SetStateAction<string | null>>; // Corrected this to React.Dispatch
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoading: boolean;
+};
+
+
+export interface ProfileState {
+  profile: User | null;
+  isLoading: boolean;
+  errorMessage: string | null;
+}
+

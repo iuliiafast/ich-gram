@@ -1,5 +1,5 @@
-import PostModel from '../models/postModel.js';
-import UserModel from '../models/userModel.js';
+import Post from '../models/postModel.js';
+import User from '../models/userModel.js';
 import getIdFromToken from '../utils/helpers.js';
 import stream from 'stream';
 import cloudinary from '../config/cloudinaryConfig.js';
@@ -13,7 +13,7 @@ export const getPosts = async (req, res) => {
         }
 
         const userId = getIdFromToken(token); // Получаем ID пользователя из токена
-        const posts = await PostModel.find({ userId }).sort({ createdAt: -1 }).exec(); // Ищем посты пользователя
+        const posts = await Post.find({ userId }).sort({ createdAt: -1 }).exec(); // Ищем посты пользователя
 
         if (!posts.length || posts.length === 0) {
             return res.status(404).json({ success: false, error: 'Посты не найдены' });
@@ -29,7 +29,7 @@ export const getPosts = async (req, res) => {
 // Получение всех постов
 export const getAllPosts = async (req, res) => {
     try {
-        const posts = await PostModel.find().sort({ createdAt: -1 }).exec();
+        const posts = await Post.find().sort({ createdAt: -1 }).exec();
 
         // Если посты не найдены
         if (!posts || posts.length === 0) {
@@ -69,13 +69,13 @@ export const createPost = async (req, res) => {
         });
 
         const imageUrl = await uploadImage();
-        const user = await UserModel.findById(userId);
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ success: false, error: 'Пользователь не найден' });
         }
 
         // Создание нового поста
-        const post = new PostModel({
+        const post = new Post({
             userId,
             userName: user.userName,
             avatar: user.avatar,
@@ -98,15 +98,15 @@ export const createPost = async (req, res) => {
 export const deletePost = async (req, res) => {
     try {
         const { postId } = req.params;
-        const post = await PostModel.findById(postId);
+        const post = await Post.findById(postId);
 
         if (!post) {
             return res.status(404).json({ success: false, error: 'Пост не найден' });
         }
 
-        await PostModel.findByIdAndDelete(postId);
+        await Post.findByIdAndDelete(postId);
 
-        const user = await UserModel.findById(post.userId);
+        const user = await User.findById(post.userId);
         if (user) {
             user.postsCount -= 1;
             await user.save();
@@ -123,7 +123,7 @@ export const deletePost = async (req, res) => {
 export const getPostById = async (req, res) => {
     try {
         const { postId } = req.params;
-        const post = await PostModel.findById(postId).populate('userId', 'userName avatar');
+        const post = await Post.findById(postId).populate('userId', 'userName avatar');
 
         if (!post) {
             return res.status(404).json({ success: false, error: 'Пост не найден' });
@@ -142,7 +142,7 @@ export const updatePost = async (req, res) => {
         const { postId } = req.params;
         const { caption, imageUrl } = req.body;
 
-        const post = await PostModel.findById(postId);
+        const post = await Post.findById(postId);
         if (!post) {
             return res.status(404).json({ success: false, error: 'Пост не найден' });
         }
