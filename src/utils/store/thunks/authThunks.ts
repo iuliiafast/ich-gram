@@ -1,10 +1,11 @@
+"use client";
 import axios from 'axios';
 import { AppDispatch } from '../index';
 import { registerStart, registerSuccess, registerFailure } from '../slices/authSlice';
 import Cookies from 'js-cookie';
-import { UserObject } from '../../types';
+import { User } from '../../types';
 
-export const registerUser = (userObject: UserObject) => async (dispatch: AppDispatch) => {
+export const registerUser = (userObject: User) => async (dispatch: AppDispatch) => {
   try {
     dispatch(registerStart());
     const response = await axios.post(`http://localhost:3000/api/auth/register`, userObject);
