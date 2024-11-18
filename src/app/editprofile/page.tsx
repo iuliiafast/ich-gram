@@ -7,11 +7,29 @@ import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
 import CldImage from "../../components/CldImage";
 import { RootState } from "../../utils/store/index";
-import {
-  updateProfileStart,
-  updateProfileSuccess,
-  updateProfileFailure,
-} from "../../utils/store/slices/profileSlice";
+import { updateProfileStart, updateProfileSuccess, updateProfileFailure } from "../../utils/store/slices/profileSlice";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { Profile, ProfileUpdates } from "../../utils/types";
+import Cookies from 'js-cookie';
+
+export const updateProfile = createAsyncThunk<Profile, ProfileUpdates>(
+  "profile/updateProfile",
+  async (profileUpdates: ProfileUpdates, { rejectWithValue }) => {
+    try {
+      const token = Cookies.get("token") || "";
+      const { data } = await axios.put('/api/user/profile', profileUpdates, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return data as Profile;  // Возвращаем обновленный профиль
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message || "Ошибка при обновлении профиля");
+      } else {
+        return rejectWithValue("Неизвестная ошибка при обновлении профиля");
+      }
+    }
+  }
+);
 
 const ProfileUpdate = ({ userId, token }: { userId: string; token: string }) => {
   const [userName, setUserName] = useState<string>("");

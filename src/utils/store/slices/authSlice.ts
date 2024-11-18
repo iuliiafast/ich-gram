@@ -1,14 +1,16 @@
 "use client";
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AuthState, User } from '../../types';
+import { User, AuthState } from '../../types';
+import $api from '../../api';
+import Cookies from 'js-cookie';
+import { AppDispatch } from '../store';
 
 const initialState: AuthState = {
-  user: null, // Используем объект пользователя
-  token: null, // Токен авторизации
-  errorMessage: null, // Ошибки авторизации
-  isLoading: false, // Состояние загрузки
+  user: null,
+  token: null,
+  errorMessage: null,
+  isLoading: false,
 };
-
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -19,28 +21,40 @@ const authSlice = createSlice({
     },
     registerSuccess: (state, action: PayloadAction<{ user: User; token: string }>) => {
       state.isLoading = false;
-      state.user = action.payload.user; // Присваиваем объект пользователя
-      state.token = action.payload.token; // Присваиваем токен
+      state.user = action.payload.user;
+      state.token = action.payload.token;
       state.errorMessage = null;
     },
     registerFailure: (state, action: PayloadAction<string>) => {
       state.isLoading = false;
-      state.errorMessage = action.payload; // Присваиваем сообщение об ошибке
+      state.errorMessage = action.payload;
     },
     clearError: (state) => {
-      state.errorMessage = null; // Очищаем ошибки
+      state.errorMessage = null;
     },
     setUser: (state, action: PayloadAction<User>) => {
-      state.user = action.payload; // Устанавливаем объект пользователя
+      state.user = action.payload;
     },
     clearUser: (state) => {
-      state.user = null; // Сбрасываем пользователя
-      state.token = null; // Сбрасываем токен
+      state.user = null;
+      state.token = null;
+    },
+    loginStart: (state) => {
+      state.isLoading = true;
+      state.errorMessage = null;
+    },
+    loginSuccess: (state, action: PayloadAction<{ user: User; token: string }>) => {
+      state.isLoading = false;
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.errorMessage = null;
+    },
+    loginFailure: (state, action: PayloadAction<string>) => {
+      state.isLoading = false;
+      state.errorMessage = action.payload;
     },
   },
 });
-
-// Экспортируем экшены и редьюсер
 export const {
   registerStart,
   registerSuccess,
@@ -48,6 +62,26 @@ export const {
   clearError,
   setUser,
   clearUser,
+  loginStart,
+  loginSuccess,
+  loginFailure
 } = authSlice.actions;
-
 export default authSlice.reducer;
+export const loginUser = (login: string, password: string) => async (dispatch: AppDispatch) => {
+  dispatch(loginStart());
+  try {
+    const response = await $api.post(`/auth/login`, { login, password });
+    dispatch(loginSuccess({
+      user: response.data.user,
+      token: response.data.token
+    }));
+    Cookies.set('token', response.data.token);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      // Если это ошибка, выводим ее сообщение
+      dispatch(loginFailure(error.message || 'Ошибка при логине.'));
+    } else {
+      dispatch(loginFailure('Ошибка при логине.'));
+    }
+  }
+};

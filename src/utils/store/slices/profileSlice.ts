@@ -1,16 +1,29 @@
 "use client";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { Profile, ProfileState } from "../../types";
+import { RootState } from "../store";
 import axios from "axios";
-import { User } from "../../types";
-import { RootState } from "../index";
 
-// Определяем начальное состояние
-interface ProfileState {
-  profile: User | null;
-  isLoading: boolean;
-  errorMessage: string | null;
-  successMessage: string | null;
-}
+export const fetchProfile = createAsyncThunk<
+  Profile, // Тип данных, которые мы получаем от API
+  string,  // Тип аргумента, который мы передаем (userId)
+  { rejectValue: string }  // Тип для ошибки
+>
+  (
+    `profile/fetchProfile`,
+    async (userId, { rejectWithValue }) => {
+      try {
+        const response = await axios.get(`/api/profile/${userId}`);
+        return response.data;
+      } catch (error) {
+        // В случае ошибки возвращаем сообщение об ошибке
+        if (error instanceof Error) {
+          return rejectWithValue(error.message);
+        }
+        return rejectWithValue("Неизвестная ошибка при загрузке профиля");
+      }
+    }
+  );
 
 const initialState: ProfileState = {
   profile: null,
@@ -18,26 +31,6 @@ const initialState: ProfileState = {
   errorMessage: null,
   successMessage: null,
 };
-
-// Асинхронный thunk для загрузки профиля
-export const fetchProfile = createAsyncThunk(
-  "profile/fetchProfile",
-  async (userId: string, { rejectWithValue }) => {
-    try {
-      const token = localStorage.getItem("token") || "";
-      const { data } = await axios.get(`/api/user/profile/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      return data as User;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        return rejectWithValue(error.message || "Ошибка при загрузке профиля");
-      } else {
-        return rejectWithValue("Неизвестная ошибка при загрузке профиля");
-      }
-    }
-  }
-);
 
 const profileSlice = createSlice({
   name: "profile",
@@ -48,7 +41,7 @@ const profileSlice = createSlice({
       state.errorMessage = null;
       state.successMessage = null;
     },
-    updateProfileSuccess(state, action: PayloadAction<User>) {
+    updateProfileSuccess(state, action: PayloadAction<Profile>) {
       state.isLoading = false;
       state.profile = action.payload;
       state.successMessage = "Профиль успешно обновлен!";
@@ -73,7 +66,7 @@ const profileSlice = createSlice({
         state.isLoading = true;
         state.errorMessage = null;
       })
-      .addCase(fetchProfile.fulfilled, (state, action: PayloadAction<User>) => {
+      .addCase(fetchProfile.fulfilled, (state, action: PayloadAction<Profile>) => {
         state.isLoading = false;
         state.profile = action.payload;
       })
@@ -88,7 +81,8 @@ export const {
   updateProfileStart,
   updateProfileSuccess,
   updateProfileFailure,
-  clearProfile
+  clearProfile,
+  clearProfileMessages
 } = profileSlice.actions;
 export const selectProfile = (state: RootState) => state.profile.profile;
 export default profileSlice.reducer;

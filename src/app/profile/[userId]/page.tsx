@@ -3,7 +3,9 @@ import React, { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch } from "../../../utils/store/index";
-import { fetchProfile, selectProfile } from "../../../utils/store/slices/profileSlice";
+import { RootState } from "../../../utils/store/index"
+import { fetchProfile } from "../../../utils/store/thunks/profileThunks";
+import { selectProfile } from "../../../utils/store/slices/profileSlice";
 import Footer from "../../../components/Footer";
 import PostFeed from "../../../components/PostFeed";
 import Sidebar from "../../../components/Sidebar";
@@ -14,7 +16,9 @@ const ProfilePage = () => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
-  const { profile, isLoading, errorMessage } = useSelector(selectProfile);
+  const profile = useSelector(selectProfile);
+  const isLoading = useSelector((state: RootState) => state.profile.isLoading);
+  const errorMessage = useSelector((state: RootState) => state.profile.errorMessage);
 
   useEffect(() => {
     if (userId) {

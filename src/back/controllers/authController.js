@@ -48,7 +48,7 @@ export const register = async (req, res) => {
 
         const { ...userWithoutPassword } = user.toJSON();
         res.status(201).json({
-            user: userWithoutPassword,
+            user: { ...userWithoutPassword, userId: user._id },
             message: 'Регистрация успешна!'
         });
     } catch (error) {

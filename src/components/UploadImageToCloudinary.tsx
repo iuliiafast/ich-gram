@@ -1,8 +1,4 @@
-import { Request, Response } from 'express';
-import mongoose from 'mongoose';
 import cloudinary from 'cloudinary';
-import UserModel from '../back/models/userModel';
-import { getIdFromToken } from '../back/config/jwt';
 import upload from '../back/middlewares/multer';
 
 // Интерфейс для обновлений профиля пользователя

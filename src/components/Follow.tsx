@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FollowPage, User } from "../utils/types"
+import { User } from "../utils/types"
 
 const FollowPage: React.FC<FollowPage> = ({ userId }) => {
   const [followers, setFollowers] = useState<User[]>([]);  // Применяем правильный тип для followers

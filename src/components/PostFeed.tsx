@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Post } from '../utils/types';
 import PostComponent from '../components/PostComponent';
-import { PostFeed } from "../utils/types";
 
 const PostFeed: React.FC<PostFeed> = ({ userId }) => {
   const [posts, setPosts] = useState<Post[]>([]);  // Состояние для постов

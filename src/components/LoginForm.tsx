@@ -5,9 +5,9 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { io, Socket } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
-import { registerStart, registerSuccess, registerFailure, clearError } from "../utils/store/slices/authSlice";
+import { loginStart, loginSuccess, loginFailure, clearError } from "../utils/store/slices/authSlice";
 import { LoginFormProps } from "../utils/types";
-import { RootState } from "../utils/store/index";
+import { RootState } from "../utils/store/store";
 
 const LoginForm = ({ setIsLoading, isLoading }: LoginFormProps) => {
   const [userObject, setUserObject] = useState<{ login: string; password: string }>({
@@ -44,67 +44,58 @@ const LoginForm = ({ setIsLoading, isLoading }: LoginFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(registerStart()); // Начало регистрации
+    dispatch(loginStart());
 
     const { login, password } = userObject;
     const isEmail = login.includes("@");
 
+
     if (!login || !password) {
-      dispatch(registerFailure("Введите email/username и пароль."));
+      dispatch(loginFailure("Введите email/username и пароль."));
       return;
     }
 
     try {
-      const response = await axios.post(
-        "/api/auth/login",
-        {
-          [isEmail ? "email" : "userName"]: login,
-          password,
-        },
+      const response = await axios.post(`/api/auth/login`, {
+        [isEmail ? "email" : "userName"]: login,
+        password,
+      },
         { withCredentials: true }
       );
 
       if (response.data.token) {
         Cookies.set("token", response.data.token, { expires: 7 });
-
-        // Диспатчим успех регистрации с полученными данными
-        dispatch(registerSuccess({ user: response.data.user, token: response.data.token }));
-
+        dispatch(loginSuccess({ user: response.data.user, token: response.data.token }));
+        const userId = response.data.user.id;
         const socketConnection = initializeWebSocket(response.data.token);
         setSocket(socketConnection);
-
-        router.push(`/profile/${response.data.user._id}`);
+        router.push(`/profile/${userId}`);
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
         const message = err.message || "Ошибка авторизации. Проверьте правильность данных.";
-        dispatch(registerFailure(message)); // Ошибка
+        dispatch(loginFailure(message));
       } else {
-        // Если ошибка не является экземпляром Error
-        dispatch(registerFailure("Произошла ошибка при авторизации."));
+        dispatch(loginFailure("Произошла ошибка при авторизации."));
       }
     } finally {
       setIsLoading(false);
     }
   };
-  // Очистка сокета при размонтировании компонента
   useEffect(() => {
     return () => {
       if (socket && socket.connected) {
-        socket.disconnect(); // Закрытие соединения при размонтировании
+        socket.disconnect();
         console.log("WebSocket: Connection closed.");
       }
     };
-  }, [socket]); // Слежение за изменением сокета
-  // Функция для очистки ошибки при изменении данных в поле ввода
+  }, [socket]);
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUserObject((prev) => ({
       ...prev,
       [name]: value,
     }));
-
-    // Очистка ошибки при изменении данных
     dispatch(clearError());
   };
 

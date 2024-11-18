@@ -1,32 +1,50 @@
 import { Request } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
 import { Types } from 'mongoose';
-import React from 'React';
+import React from 'react';
 
-// Интерфейс пользователя
-export interface User {
+export interface UserRegistration {
+  email: string;
+  fullName: string;
+  userName: string;
+  password: string;
+  profile: {
+    postsCount: number;
+    followersCount: number;
+    followingCount: number;
+    bio: string;
+    website: string;
+    avatar: string;
+  };
+}
+
+export interface Profile {
   userId: string;
   userName: string;
-  avatar: string;
+  avatar?: string;
   postsCount: number;
   followersCount: number;
   followingCount: number;
-  bio: string;
+  bio?: string;
   website?: string;
 }
-
-// Интерфейс для API-ответа профиля
-export interface ProfileResponse {
-  userId: string;
+export interface User {
+  _id: string;
+  email: string;
   userName: string;
   fullName: string;
-  avatar: string;
-  postsCount: number;
-  followersCount: number;
-  followingCount: number;
-  bio: string;
+  password: string
+  profile: Profile;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
+export interface ProfileState {
+  profile: Profile | null;
+  isLoading: boolean;
+  errorMessage: string | null;
+  successMessage: string | null;
+}
 // Интерфейс для запроса с пользователем
 export interface RequestWithUser extends Request {
   user?: {
@@ -123,8 +141,9 @@ export type LoginFormProps = {
 
 
 export interface ProfileState {
-  profile: User | null;
+  profile: Profile | null;
   isLoading: boolean;
   errorMessage: string | null;
+  successMessage: string | null;
 }
 
