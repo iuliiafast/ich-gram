@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
 
 const profileSchema = new mongoose.Schema({
     avatar: { type: String, default: `/default-avatar.png` },
@@ -18,25 +17,6 @@ const userSchema = new mongoose.Schema(
         password: { type: String, required: true },
         profile: { type: profileSchema, default: {} }
     }, { timestamps: true });
-
-userSchema.pre('save', async function (next) {
-    if (this.isModified('password')) {
-        try {
-            const salt = await bcrypt.genSalt(10);
-            this.password = await bcrypt.hash(this.password, salt);
-        } catch (err) {
-            return next(err);
-        }
-    }
-    next();
-});
-
-userSchema.set('toJSON', {
-    transform: (doc, ret) => {
-        delete ret.password;
-        return ret;
-    },
-});
 
 const User = mongoose.model('User', userSchema);
 

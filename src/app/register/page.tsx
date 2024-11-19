@@ -49,11 +49,16 @@ const RegisterPage = () => {
   };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!user.email || !user.password || !user.userName || !user.fullName) {
+      setErrorMessage("Пожалуйста, заполните все обязательные поля.");
+      return;
+    }
     try {
       const result = await dispatch(registerUser(user));
       if (result?.user?._id && result?.token) {
         Cookies.set("token", result.token);
-        router.push(`/main`);
+        router.push(`/`);
       } else {
         throw new Error("Ошибка регистрации: пользователь не создан.");
       }

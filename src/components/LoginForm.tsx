@@ -1,9 +1,9 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import $api from "../utils/api";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import { io, Socket } from "socket.io-client";
+//import { io, Socket } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
 import { loginStart, loginSuccess, loginFailure, clearError } from "../utils/store/slices/authSlice";
 import { LoginFormProps } from "../utils/types";
@@ -14,13 +14,13 @@ const LoginForm = ({ setIsLoading, isLoading }: LoginFormProps) => {
     login: "",
     password: "",
   });
-  const [socket, setSocket] = useState<Socket | null>(null);
+  //const [socket, setSocket] = useState<Socket | null>(null);
   const dispatch = useDispatch();
   const router = useRouter();
 
   const { errorMessage, isLoading: reduxIsLoading } = useSelector((state: RootState) => state.auth);
 
-  const initializeWebSocket = (token: string) => {
+  /*const initializeWebSocket = (token: string) => {
     const socket = io("/", {
       auth: {
         token: `Bearer ${token}`,
@@ -40,7 +40,7 @@ const LoginForm = ({ setIsLoading, isLoading }: LoginFormProps) => {
     });
 
     return socket;
-  };
+  };*/
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +56,7 @@ const LoginForm = ({ setIsLoading, isLoading }: LoginFormProps) => {
     }
 
     try {
-      const response = await $api.post(`/api/auth/login`, {
+      const response = await $api.post(`/auth/login`, {
         [isEmail ? "email" : "userName"]: login,
         password,
       },
@@ -66,9 +66,9 @@ const LoginForm = ({ setIsLoading, isLoading }: LoginFormProps) => {
       if (response.data.token) {
         Cookies.set("token", response.data.token, { expires: 7 });
         dispatch(loginSuccess({ user: response.data.user, token: response.data.token }));
-        const socketConnection = initializeWebSocket(response.data.token);
-        setSocket(socketConnection);
-        router.push(`/main`);
+        //const socketConnection = initializeWebSocket(response.data.token);
+        //setSocket(socketConnection);
+        router.push(`/`);
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -81,14 +81,14 @@ const LoginForm = ({ setIsLoading, isLoading }: LoginFormProps) => {
       setIsLoading(false);
     }
   };
-  useEffect(() => {
+  /*useEffect(() => {
     return () => {
       if (socket && socket.connected) {
         socket.disconnect();
         console.log("WebSocket: Connection closed.");
       }
     };
-  }, [socket]);
+  }, [socket]);*/
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUserObject((prev) => ({

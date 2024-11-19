@@ -1,6 +1,6 @@
 "use client";
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { User, AuthState } from '../../types';
+import { User, AuthState, UserRegistration, RegisterResponse } from '../../types';
 import $api from '../../api';
 import Cookies from 'js-cookie';
 import { AppDispatch } from '../store';
@@ -75,6 +75,27 @@ export const {
   clearToken
 } = authSlice.actions;
 export default authSlice.reducer;
+export const registerUser = (userObject: UserRegistration) => async (dispatch: AppDispatch): Promise<RegisterResponse> => {
+  try {
+    dispatch(registerStart());
+    const response = await $api.post(`/auth/register`, userObject);
+    if (response.data?.token && response.data?.user) {
+      Cookies.set("token", response.data.token, { expires: 7, sameSite: "lax", secure: false });
+      dispatch(registerSuccess({ user: response.data.user, token: response.data.token }));
+      return { user: response.data.user, token: response.data.token };
+    } else {
+      throw new Error("Токен отсутствует в ответе сервера.");
+    }
+  } catch (error: unknown) {
+    let errorMsg = "Произошла ошибка при регистрации.";
+    if (error instanceof Error && error.message) {
+      errorMsg = error.message;
+    }
+    dispatch(registerFailure(errorMsg));
+    throw new Error(errorMsg);
+  }
+};
+
 export const loginUser = (login: string, password: string) => async (dispatch: AppDispatch) => {
   dispatch(loginStart());
   try {
@@ -86,7 +107,6 @@ export const loginUser = (login: string, password: string) => async (dispatch: A
     Cookies.set('token', response.data.token);
   } catch (error: unknown) {
     if (error instanceof Error) {
-      // Если это ошибка, выводим ее сообщение
       dispatch(loginFailure(error.message || 'Ошибка при логине.'));
     } else {
       dispatch(loginFailure('Ошибка при логине.'));

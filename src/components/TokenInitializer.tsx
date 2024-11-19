@@ -16,7 +16,7 @@ const TokenInitializer = () => {
     if (token) {
       console.log("Токен из cookies:", token);
       if (pathname === '/login' || pathname === '/register') {
-        router.push('/dashboard');
+        router.push('/');
       }
     } else {
       console.log("Токен не найден в cookies");

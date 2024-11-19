@@ -1,14 +1,14 @@
 "use client";
+
 import React from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
-import { MenuItem } from "../utils/types";
+import { useSelector } from "react-redux";
+import { RootState } from "../utils/store/store";
+import { MenuItemProps } from "../utils/types";
 
 const Sidebar: React.FC = () => {
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const menuItems: MenuItem[] = [
+  const menuItems: MenuItemProps[] = [
     { name: "Home", path: "/", iconSrc: "/sidebar/haus.svg" },
     { name: "Search", path: "/search", iconSrc: "/sidebar/search.svg" },
     { name: "Explore", path: "/explore", iconSrc: "/sidebar/exp.svg" },
@@ -16,6 +16,19 @@ const Sidebar: React.FC = () => {
     { name: "Notifications", path: "/notifications", iconSrc: "/sidebar/herz.svg" },
     { name: "Create", path: "/post", iconSrc: "/sidebar/add.svg" },
   ];
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const userId = useSelector((state: RootState) => state.profile.profile?.userId);
+
+  const handleProfileClick = () => {
+    if (userId && userId !== '') {
+      console.log(`Navigating to profile for userId: ${userId}`);
+      router.push(`/profile/${userId}`);
+    } else {
+      console.log("User not found");
+    }
+  };
 
   return (
     <div className="fixed top-0 left-0 h-full w-64 bg-white shadow-lg p-4">
@@ -36,6 +49,13 @@ const Sidebar: React.FC = () => {
             {item.name}
           </button>
         ))}
+
+        <button
+          onClick={handleProfileClick}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+        >
+          Перейти в профиль
+        </button>
       </nav>
     </div>
   );

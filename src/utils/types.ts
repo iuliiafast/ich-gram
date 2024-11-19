@@ -150,4 +150,9 @@ export interface RegisterResponse {
   user: User;
   token: string;
 }
+export type MenuItemProps = {
+  name: string;
+  path: string;
+  iconSrc: string;
+};
 

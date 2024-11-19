@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch } from "../../../utils/store/store";
 import { RootState } from "../../../utils/store/store"
@@ -11,9 +11,16 @@ import PostFeed from "../../../components/PostFeed";
 import Sidebar from "../../../components/Sidebar";
 import ProtectedRoute from "../../../components/ProtectedRoute";
 
-const ProfilePage = ({ userId }: { userId: string }) => {
-  const { userId } = useParams();
+const ProfilePage = () => {
   const router = useRouter();
+  const userId = useSelector((state: RootState) => state.profile.profile?.userId);
+  if (userId) {
+    console.log("UserId:", userId);
+    router.push(`/profile/${userId}`);
+  } else {
+    console.log("UserId не найден");
+  }
+
   const dispatch = useDispatch<AppDispatch>();
   const profile = useSelector(selectProfile);
   const isLoading = useSelector((state: RootState) => state.profile.isLoading);

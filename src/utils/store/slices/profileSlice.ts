@@ -18,15 +18,13 @@ export const fetchProfile = createAsyncThunk<
       } catch (error) {
 
         if (error instanceof Error) {
-          // Логирование ошибки
           console.error("Ошибка при загрузке профиля:", error.message);
 
-          // Специфическая обработка ошибок
           if (error.message.includes("Network Error")) {
             return rejectWithValue("Нет соединения с сервером. Пожалуйста, попробуйте позже.");
           }
 
-          return rejectWithValue(error.message); // Возвращаем стандартное сообщение об ошибке
+          return rejectWithValue(error.message);
         }
 
         return rejectWithValue("Неизвестная ошибка при загрузке профиля");
