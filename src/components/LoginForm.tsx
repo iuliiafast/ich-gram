@@ -5,12 +5,20 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { io, Socket } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
-import { loginStart, loginSuccess, loginFailure, clearError } from "../utils/store/slices/authSlice";
+import {
+  loginStart,
+  loginSuccess,
+  loginFailure,
+  clearError,
+} from "../utils/store/slices/authSlice";
 import { LoginFormProps } from "../utils/types";
 import { RootState } from "../utils/store/store";
 
 const LoginForm = ({ setIsLoading, isLoading }: LoginFormProps) => {
-  const [userObject, setUserObject] = useState<{ login: string; password: string }>({
+  const [userObject, setUserObject] = useState<{
+    login: string;
+    password: string;
+  }>({
     login: "",
     password: "",
   });
@@ -18,7 +26,9 @@ const LoginForm = ({ setIsLoading, isLoading }: LoginFormProps) => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { errorMessage, isLoading: reduxIsLoading } = useSelector((state: RootState) => state.auth);
+  const { errorMessage, isLoading: reduxIsLoading } = useSelector(
+    (state: RootState) => state.auth
+  );
 
   const initializeWebSocket = (token: string) => {
     const socket = io("/", {
@@ -49,30 +59,34 @@ const LoginForm = ({ setIsLoading, isLoading }: LoginFormProps) => {
     const { login, password } = userObject;
     const isEmail = login.includes("@");
 
-
     if (!login || !password) {
       dispatch(loginFailure("Введите email/username и пароль."));
       return;
     }
 
     try {
-      const response = await $api.post(`/api/auth/login`, {
-        [isEmail ? "email" : "userName"]: login,
-        password,
-      },
+      const response = await $api.post(
+        `/auth/login`,
+        {
+          [isEmail ? "email" : "userName"]: login,
+          password,
+        },
         { withCredentials: true }
       );
 
       if (response.data.token) {
         Cookies.set("token", response.data.token, { expires: 7 });
-        dispatch(loginSuccess({ user: response.data.user, token: response.data.token }));
+        dispatch(
+          loginSuccess({ user: response.data.user, token: response.data.token })
+        );
         const socketConnection = initializeWebSocket(response.data.token);
         setSocket(socketConnection);
         router.push(`/main`);
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
-        const message = err.message || "Ошибка авторизации. Проверьте правильность данных.";
+        const message =
+          err.message || "Ошибка авторизации. Проверьте правильность данных.";
         dispatch(loginFailure(message));
       } else {
         dispatch(loginFailure("Произошла ошибка при авторизации."));
