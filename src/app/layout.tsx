@@ -30,7 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ClientProviders>
-          <TokenInitializer /> {/* Теперь токен проверяется */}
+          <TokenInitializer />
           {children}
         </ClientProviders>
       </body>
