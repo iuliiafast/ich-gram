@@ -1,10 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import $api from "../utils/api";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-// ProfileButton компонент
 const ProfileButton = ({ userId, token }: { userId: string, token: string }) => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -18,14 +17,9 @@ const ProfileButton = ({ userId, token }: { userId: string, token: string }) => 
     }
     const fetchAvatar = async () => {
       try {
-        const response = await axios.get(`/api/avatar/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await $api.get(`/avatar/${userId}`);
 
-        // Если аватар есть, то показываем его, иначе - дефолт
-        const fetchedAvatar = response.data?.avatar || "/default-avatar.png";
+        const fetchedAvatar = response.data?.avatar || `/default-avatar.png`;
         setAvatarUrl(fetchedAvatar);
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -35,7 +29,7 @@ const ProfileButton = ({ userId, token }: { userId: string, token: string }) => 
           console.error("Неизвестная ошибка:", error);
           setErrorMessage("Произошла неизвестная ошибка.");
         }
-        setAvatarUrl("/default-avatar.png"); // В случае ошибки показываем дефолтный аватар
+        setAvatarUrl(`/default-avatar.png`); // В случае ошибки показываем дефолтный аватар
       }
     };
 
@@ -50,7 +44,7 @@ const ProfileButton = ({ userId, token }: { userId: string, token: string }) => 
     <div>
       <button onClick={handleClick} className="profile-button">
         <Image
-          src={avatarUrl || "/default-avatar.png"}
+          src={avatarUrl || `/default-avatar.png`}
           alt="Avatar"
           width="40"
           height="40"

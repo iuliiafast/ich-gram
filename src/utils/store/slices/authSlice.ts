@@ -53,6 +53,12 @@ const authSlice = createSlice({
       state.isLoading = false;
       state.errorMessage = action.payload;
     },
+    setToken(state, action: PayloadAction<string>) {
+      state.token = action.payload;
+    },
+    clearToken(state) {
+      state.token = null;
+    },
   },
 });
 export const {
@@ -64,7 +70,9 @@ export const {
   clearUser,
   loginStart,
   loginSuccess,
-  loginFailure
+  loginFailure,
+  setToken,
+  clearToken
 } = authSlice.actions;
 export default authSlice.reducer;
 export const loginUser = (login: string, password: string) => async (dispatch: AppDispatch) => {

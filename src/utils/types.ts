@@ -146,4 +146,8 @@ export interface ProfileState {
   errorMessage: string | null;
   successMessage: string | null;
 }
+export interface RegisterResponse {
+  user: User;
+  token: string;
+}
 

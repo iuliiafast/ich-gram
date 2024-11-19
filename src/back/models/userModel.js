@@ -2,14 +2,13 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const profileSchema = new mongoose.Schema({
-    avatar: { type: String, default: '/default-avatar.png' },
+    avatar: { type: String, default: `/default-avatar.png` },
     postsCount: { type: Number, default: 0 },
     followersCount: { type: Number, default: 0 },
     followingCount: { type: Number, default: 0 },
     bio: { type: String, default: '' },
     website: { type: String, default: '' },
 });
-
 
 const userSchema = new mongoose.Schema(
     {
@@ -38,7 +37,6 @@ userSchema.set('toJSON', {
         return ret;
     },
 });
-
 
 const User = mongoose.model('User', userSchema);
 

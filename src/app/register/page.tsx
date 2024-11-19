@@ -6,6 +6,8 @@ import { registerUser } from "../../utils/store/thunks/regThunks";
 import { AppDispatch } from "../../utils/store/store";
 import { UserRegistration } from "../../utils/types";
 import { RootState } from "../../utils/store/store";
+import Cookies from "js-cookie";
+
 
 const RegisterPage = () => {
   const [user, setUser] = useState<UserRegistration>({
@@ -45,14 +47,13 @@ const RegisterPage = () => {
       };
     });
   };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     try {
-      const User = await dispatch(registerUser(user));
-      if (User?._id) {
-        router.push(`/profile/${User._id}`);
+      const result = await dispatch(registerUser(user));
+      if (result?.user?._id && result?.token) {
+        Cookies.set("token", result.token);
+        router.push(`/main`);
       } else {
         throw new Error("Ошибка регистрации: пользователь не создан.");
       }

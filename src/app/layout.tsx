@@ -2,6 +2,7 @@ import localFont from "next/font/local";
 import "./styles/globals.css";
 import React from "react";
 import ClientProviders from "../components/ClientProviders";
+import TokenInitializer from "../components/TokenInitializer";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,6 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ClientProviders>
+          <TokenInitializer /> {/* Теперь токен проверяется */}
           {children}
         </ClientProviders>
       </body>

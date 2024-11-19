@@ -2,24 +2,33 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { Profile, ProfileState } from "../../types";
 import { RootState } from "../store";
-import axios from "axios";
+import $api from "../../api";
 
 export const fetchProfile = createAsyncThunk<
-  Profile, // Тип данных, которые мы получаем от API
-  string,  // Тип аргумента, который мы передаем (userId)
-  { rejectValue: string }  // Тип для ошибки
+  Profile,
+  string,
+  { rejectValue: string }
 >
   (
     `profile/fetchProfile`,
     async (userId, { rejectWithValue }) => {
       try {
-        const response = await axios.get(`/api/profile/${userId}`);
+        const response = await $api.get(`/api/profile/${userId}`);
         return response.data;
       } catch (error) {
-        // В случае ошибки возвращаем сообщение об ошибке
+
         if (error instanceof Error) {
-          return rejectWithValue(error.message);
+          // Логирование ошибки
+          console.error("Ошибка при загрузке профиля:", error.message);
+
+          // Специфическая обработка ошибок
+          if (error.message.includes("Network Error")) {
+            return rejectWithValue("Нет соединения с сервером. Пожалуйста, попробуйте позже.");
+          }
+
+          return rejectWithValue(error.message); // Возвращаем стандартное сообщение об ошибке
         }
+
         return rejectWithValue("Неизвестная ошибка при загрузке профиля");
       }
     }

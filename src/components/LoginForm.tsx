@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import $api from "../utils/api";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { io, Socket } from "socket.io-client";
@@ -56,7 +56,7 @@ const LoginForm = ({ setIsLoading, isLoading }: LoginFormProps) => {
     }
 
     try {
-      const response = await axios.post(`/api/auth/login`, {
+      const response = await $api.post(`/api/auth/login`, {
         [isEmail ? "email" : "userName"]: login,
         password,
       },
@@ -66,10 +66,9 @@ const LoginForm = ({ setIsLoading, isLoading }: LoginFormProps) => {
       if (response.data.token) {
         Cookies.set("token", response.data.token, { expires: 7 });
         dispatch(loginSuccess({ user: response.data.user, token: response.data.token }));
-        const userId = response.data.user.id;
         const socketConnection = initializeWebSocket(response.data.token);
         setSocket(socketConnection);
-        router.push(`/profile/${userId}`);
+        router.push(`/main`);
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
