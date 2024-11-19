@@ -1,4 +1,4 @@
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import User from '../models/userModel.js';
 import { generateToken } from '../config/jwt.js';
 
@@ -61,7 +61,9 @@ export const login = async (req, res) => {
         if (!user) {
             return res.status(400).json({ message: 'Неверный email/userName или пароль.' });
         }
-        const isMatch = await bcrypt.compare(password, user.password);
+        // const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password) // ??? false
+        console.log(isMatch)
         if (!isMatch) {
             return res.status(400).json({ message: 'Неверный email/userName или пароль.' });
         }

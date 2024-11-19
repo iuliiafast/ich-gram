@@ -13,54 +13,55 @@ const MainPage = () => {
   const router = useRouter();
   const { profile } = useSelector((state: RootState) => state.profile);
   useEffect(() => {
-    if (userId, token) {
-      dispatch(fetchProfile(userId, token));
+    if (profile?.userId) {
+      dispatch(fetchProfile(profile?.userId));
     }
-  }, [dispatch, userId, token]);
+  }, [dispatch, profile?.userId]);
   const handleProfileClick = () => {
-    if (userId && userId !== '')
-      console.log(`Navigating to profile for userId: ${userId}`);
-    router.push(`/profile/${userId}`);
-  } else {
-    console.log("user не найден");
-}
-  }
+    if (profile?.userId && profile?.userId !== "") {
+      console.log(`Navigating to profile for userId: ${profile?.userId}`);
+      router.push(`/profile/${profile?.userId}`);
+    } else {
+      console.log("user не найден");
+    }
+  };
 
-const imageUrls = [
-  `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample1.jpg`,
-  `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample2.jpg`,
-  `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample3.jpg`,
-  `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample4.jpg`,
-];
+  const imageUrls = [
+    `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample1.jpg`,
+    `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample2.jpg`,
+    `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample3.jpg`,
+    `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/random/v1683188475/sample4.jpg`,
+  ];
 
-return (
-  <>
-    <div>
+  return (
+    <>
       <div>
-        <Sidebar />
-        <button
-          onClick={handleProfileClick}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-        >
-          Перейти в профиль
-        </button>
+        <div>
+          <Sidebar />
+          <button
+            onClick={handleProfileClick}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          >
+            Перейти в профиль
+          </button>
+        </div>
+        <div className="grid grid-cols-2 grid-rows-2 gap-4 mt-4">
+          {imageUrls.map((url, index) => (
+            <div key={index} className="bg-green-400 h-full">
+              <Image
+                src={url}
+                alt={`Random Image ${index + 1}`}
+                width={317}
+                height={317}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="grid grid-cols-2 grid-rows-2 gap-4 mt-4">
-        {imageUrls.map((url, index) => (
-          <div key={index} className="bg-green-400 h-full">
-            <Image
-              src={url}
-              alt={`Random Image ${index + 1}`}
-              width={317}
-              height={317}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-    <Footer />
-  </>
-);
+      <Footer />
+    </>
+  );
+};
 
 export default MainPage;
