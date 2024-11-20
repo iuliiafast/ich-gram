@@ -86,7 +86,10 @@ nextApp.prepare().then(() => {
   app.use('/api/likes', likeRoutes);
   app.use('/api/follow', followRoutes);
   app.use('/api/notifications', notificationRoutes);
-
+  app.use((err, res) => {
+    console.error(err.stack);
+    res.status(500).send({ error: 'Что-то пошло не так, попробуйте снова.' });
+  });
   // Next.js маршруты
   app.all('*', (req, res) => {
     console.log('Обрабатывается запрос Next.js');

@@ -1,30 +1,31 @@
 "use client";
 import { useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
-import { loadTokenFromCookies } from "../utils/authHelpers";
-import { useDispatch } from "react-redux";
+import { useRouter } from 'next/navigation';
+import $api from '../utils/api';
+//import Cookies from 'js-cookie';
 
 const TokenInitializer = () => {
-  const dispatch = useDispatch();
   const router = useRouter();
-  const pathname = usePathname();
-  useEffect(() => {
-    loadTokenFromCookies(dispatch);
-    const token = Cookies.get("token");
 
-    if (token) {
-      console.log("Токен из cookies:", token);
-      if (pathname === '/login' || pathname === '/register') {
+  useEffect(() => {
+    // Пытаемся проверить токен через запрос на сервер
+    const checkTokenValidity = async () => {
+      try {
+        const response = await $api.get('/validate-token');  // Запрос на сервер для проверки токена
+        console.log('Токен валиден:', response.data);
+
+        // Перенаправляем пользователя на нужную страницу, если токен валиден
         router.push('/');
-      }
-    } else {
-      console.log("Токен не найден в cookies");
-      if (pathname !== '/login' && pathname !== '/register') {
+      } catch (error) {
+        console.log('Токен невалиден или не найден:', error);
+
+        // Если токен невалиден или отсутствует, перенаправляем на страницу логина
         router.push('/login');
       }
-    }
-  }, [dispatch, pathname, router,]);
+    };
+
+    checkTokenValidity();
+  }, [router]);
 
   return null;
 };

@@ -1,37 +1,42 @@
-"use client";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { Profile, ProfileState } from "../../types";
+import { Profile, ProfileState, ProfileUpdates } from "../../types";
 import { RootState } from "../store";
 import $api from "../../api";
 
-export const fetchProfile = createAsyncThunk<
-  Profile,
-  string,
-  { rejectValue: string }
->
-  (
-    `profile/fetchProfile`,
-    async (userId, { rejectWithValue }) => {
-      try {
-        const response = await $api.get(`/api/profile/${userId}`);
-        return response.data;
-      } catch (error) {
+export const fetchProfile = createAsyncThunk<Profile, string, { rejectValue: string }>(
+  "profile/fetchProfile",
+  async (userId, { rejectWithValue }) => {
+    try {
+      const response = await $api.get(`/api/profile/${userId}`);
+      return response.data;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Ошибка при загрузке профиля:", error.message);
 
-        if (error instanceof Error) {
-          console.error("Ошибка при загрузке профиля:", error.message);
-
-          if (error.message.includes("Network Error")) {
-            return rejectWithValue("Нет соединения с сервером. Пожалуйста, попробуйте позже.");
-          }
-
-          return rejectWithValue(error.message);
+        if (error.message.includes("Network Error")) {
+          return rejectWithValue("Нет соединения с сервером. Пожалуйста, попробуйте позже.");
         }
 
-        return rejectWithValue("Неизвестная ошибка при загрузке профиля");
+        return rejectWithValue(error.message);
       }
+      return rejectWithValue("Неизвестная ошибка при загрузке профиля");
     }
-  );
-
+  }
+);
+export const updateProfile = createAsyncThunk(
+  "profile/updateProfile",
+  async (profileUpdates: ProfileUpdates, { rejectWithValue }) => {
+    try {
+      const response = await $api.put("/user/current", profileUpdates);
+      return response.data;
+    } catch (error) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue("Неизвестная ошибка");
+    }
+  }
+);
 const initialState: ProfileState = {
   profile: null,
   isLoading: false,
@@ -91,5 +96,7 @@ export const {
   clearProfile,
   clearProfileMessages
 } = profileSlice.actions;
+
 export const selectProfile = (state: RootState) => state.profile.profile;
+
 export default profileSlice.reducer;

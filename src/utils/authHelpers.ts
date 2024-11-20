@@ -10,5 +10,5 @@ export const loadTokenFromCookies = (dispatch: AppDispatch) => {
 };
 export const logout = (dispatch: AppDispatch) => {
   Cookies.remove("token");
-  dispatch(setToken(null));
+  dispatch(setToken(""));
 };

@@ -32,13 +32,13 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.errorMessage = null;
     },
-    setUser: (state, action: PayloadAction<User>) => {
-      state.user = action.payload;
-    },
-    clearUser: (state) => {
-      state.user = null;
-      state.token = null;
-    },
+    /*  setUser: (state, action: PayloadAction<User>) => {
+        state.user = action.payload;
+      },
+      clearUser: (state) => {
+        state.user = null;
+        state.token = null;
+      },*/
     loginStart: (state) => {
       state.isLoading = true;
       state.errorMessage = null;

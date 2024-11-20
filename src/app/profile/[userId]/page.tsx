@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch } from "../../../utils/store/store";
 import { RootState } from "../../../utils/store/store"
-import { fetchProfile } from "../../../utils/store/thunks/profileThunks";
+import { fetchProfile } from "../../../utils/store/slices/profileSlice";
 import { selectProfile } from "../../../utils/store/slices/profileSlice";
 import Footer from "../../../components/Footer";
 import PostFeed from "../../../components/PostFeed";

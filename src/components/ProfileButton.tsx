@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import $api from "../utils/api";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import axios from "axios";
 
 const ProfileButton = ({ userId, token }: { userId: string, token: string }) => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -29,7 +30,7 @@ const ProfileButton = ({ userId, token }: { userId: string, token: string }) => 
           console.error("Неизвестная ошибка:", error);
           setErrorMessage("Произошла неизвестная ошибка.");
         }
-        setAvatarUrl(`/default-avatar.png`); // В случае ошибки показываем дефолтный аватар
+        setAvatarUrl(`/default-avatar.png`);
       }
     };
 
@@ -37,7 +38,7 @@ const ProfileButton = ({ userId, token }: { userId: string, token: string }) => 
   }, [userId, token]);
 
   const handleClick = () => {
-    router.push(`/profile/${userId}`); // Переход на страницу профиля
+    router.push(`/profile/${userId}`);
   };
 
   return (

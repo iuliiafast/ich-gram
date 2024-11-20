@@ -1,13 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser } from "../../utils/store/thunks/regThunks";
+import { registerUser } from "../../utils/store/slices/authSlice";
 import { AppDispatch } from "../../utils/store/store";
 import { UserRegistration } from "../../utils/types";
 import { RootState } from "../../utils/store/store";
 import Cookies from "js-cookie";
-
 
 const RegisterPage = () => {
   const [user, setUser] = useState<UserRegistration>({
@@ -24,41 +23,47 @@ const RegisterPage = () => {
       avatar: "",
     },
   });
-  const [errorMessage, setErrorMessage] = useState<string | null>("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const dispatch: AppDispatch = useDispatch();
   const router = useRouter();
-  const isLoading = useSelector((state: RootState) => state.auth.isLoading);
+  const { isLoading, errorMessage: reduxError } = useSelector(
+    (state: RootState) => state.auth
+  );
+
+  // Обработка ошибок из Redux
+  useEffect(() => {
+    if (reduxError) {
+      setErrorMessage(reduxError);
+    }
+  }, [reduxError]);
+
+  // Обработчик изменений в инпуте
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    const keys = name.split(".");
-    setUser((prev) => {
-      if (keys.length > 1) {
-        return {
-          ...prev,
-          profile: {
-            ...prev.profile,
-            [keys[1]]: value,
-          },
-        };
-      }
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
+    setUser((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
+
+  // Обработчик отправки формы
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Проверка на обязательные поля
     if (!user.email || !user.password || !user.userName || !user.fullName) {
       setErrorMessage("Пожалуйста, заполните все обязательные поля.");
       return;
     }
+
     try {
+      // Регистрация пользователя через Redux
       const result = await dispatch(registerUser(user));
-      if (result?.user?._id && result?.token) {
-        Cookies.set("token", result.token);
-        router.push(`/`);
+
+      // Если токен получен, сохраняем его в Cookies и редиректим
+      if (result?.token) {
+        Cookies.set("token", result.token, { expires: 7, sameSite: "lax", secure: false });
+        router.push("/");
       } else {
         throw new Error("Ошибка регистрации: пользователь не создан.");
       }
@@ -69,7 +74,6 @@ const RegisterPage = () => {
   };
 
   return (
-
     <>
       <div className="flex items-center justify-center h-screen bg-gray-100">
         <div className="bg-white p-6 rounded-lg shadow-md w-80">
@@ -125,6 +129,7 @@ const RegisterPage = () => {
     </>
   );
 };
+
 export default RegisterPage;
 
 /*const { isLoading, errorMessage: reduxErrorMessage } = useSelector(

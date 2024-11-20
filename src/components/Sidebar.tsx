@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
@@ -27,6 +26,7 @@ const Sidebar: React.FC = () => {
       router.push(`/profile/${userId}`);
     } else {
       console.log("User not found");
+      alert("Вы не авторизованы. Пожалуйста, войдите в систему.");
     }
   };
 
@@ -37,22 +37,32 @@ const Sidebar: React.FC = () => {
 
       <nav className="w-full my-4">
         {/* Итерация по пунктам меню */}
-        {menuItems.map((item) => (
-          <button
-            key={item.name}
-            onClick={() => router.push(item.path)} // Навигация по клику
-            className={`w-full text-left px-6 py-3 mb-2 rounded-lg font-medium 
-              ${pathname === item.path ? "bg-blue-600 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white"}`}
-          >
-            {/* Иконка меню */}
-            <Image src={item.iconSrc} alt={item.name} width={24} height={24} className="mr-3" />
-            {item.name}
-          </button>
-        ))}
+        {menuItems.map((item) => {
+          const isActive = pathname === item.path;
+          return (
+            <button
+              key={item.name}
+              onClick={() => router.push(item.path)} // Навигация по клику
+              className={`w-full text-left px-6 py-3 mb-2 rounded-lg font-medium 
+                ${isActive ? "bg-blue-600 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white"}`}
+            >
+              {/* Иконка меню */}
+              <Image
+                src={item.iconSrc}
+                alt={item.name}
+                width={24}
+                height={24}
+                className="mr-3"
+              />
+              {item.name}
+            </button>
+          );
+        })}
 
+        {/* Кнопка перехода в профиль */}
         <button
           onClick={handleProfileClick}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mt-4"
         >
           Перейти в профиль
         </button>

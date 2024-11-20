@@ -109,9 +109,10 @@ export type AvatarUploadProps = {
 
 // Интерфейс для обновления профиля
 export interface ProfileUpdates {
-  userName?: string;
+  userName: string;
   bio?: string;
-  avatar?: string; // URL изображения в Cloudinary
+  avatar?: string;
+  website?: string;
 }
 
 // Интерфейс результата загрузки Cloudinary
@@ -138,8 +139,6 @@ export type LoginFormProps = {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   isLoading: boolean;
 };
-
-
 export interface ProfileState {
   profile: Profile | null;
   isLoading: boolean;
@@ -154,5 +153,4 @@ export type MenuItemProps = {
   name: string;
   path: string;
   iconSrc: string;
-};
-
+}
